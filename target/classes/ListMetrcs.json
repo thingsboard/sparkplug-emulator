@@ -1,0 +1,32 @@
+{
+  "edgeNode": {
+    "Node Control/Reboot": "Boolean",
+    "Node Control/Rebirth": "Boolean",
+    "Node Control/Next Server": "Boolean",
+    "Node Control/Scan Rate": "Int64",
+    "Properties/Hardware Make": "String",
+    "Last Update FW": "DateTime",
+    "Current Grid Voltage": "Float"
+  },
+  "deviceId1": {
+    "Node Control/Reboot": "Boolean",
+    "Node Control/Rebirth": "Boolean",
+    "Node Control/Next Server": "Boolean",
+    "Node Control/Scan Rate": "Int64",
+    "Properties/Hardware Make": "String",
+    "Last Update FW": "DateTime",
+    "Current Grid Voltage": "Float",
+    "Outputs/LEDs/Green": "Boolean",
+    "Outputs/LEDs/Yellow": "Boolean"
+  },
+  "deviceId2": {
+    "Node Control/Reboot": "Boolean",
+    "Node Control/Rebirth": "Boolean",
+    "MyNodeMetric01_Int32": "Int32",
+    "MyNodeMetric02_LongInt64": "Int64",
+    "MyNodeMetric03_Double": "Double",
+    "MyNodeMetric04_Float": "Float",
+    "MyNodeMetric05_String": "String",
+    "MyNodeMetric06_Json_Bytes": "Bytes"
+  }
+}

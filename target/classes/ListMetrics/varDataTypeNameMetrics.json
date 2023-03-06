@@ -1,8 +1,0 @@
-{
-  "MyNodeMetric01_Int32": "Int32",
-  "MyNodeMetric02_LongInt64": "Int64",
-  "MyNodeMetric03_Double": "Double",
-  "MyNodeMetric04_Float": "Float",
-  "MyNodeMetric05_String": "String",
-  "MyNodeMetric06_Json_Bytes": "Bytes"
-}
