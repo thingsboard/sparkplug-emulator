@@ -1,0 +1,5 @@
+{
+  "Device Control/Reboot": "Boolean",
+  "Device Control/Rebirth": "Boolean",
+  "Device Control/Next Server": "Boolean"
+}
