@@ -1,0 +1,89 @@
+[
+  {
+    "nodeDeviceId": "NodeSparkplug",
+    "nodeDeviceListMetrics": [
+      {
+        "nameMetric": "Node Control/Reboot",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Rebirth",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Next Server",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Scan Rate",
+        "typeMetric": "Int64"
+      },
+      {
+        "nameMetric": "Properties/Hardware Make",
+        "typeMetric": "String"
+      },
+      {
+        "nameMetric": "Last Update FW",
+        "typeMetric": "DateTime"
+      },
+      {
+        "nameMetric": "Current Grid Voltage",
+        "typeMetric": "Float"
+      }
+    ]
+  },
+  {
+    "nodeDeviceId": "deviceSparkplugId1",
+    "nodeDeviceListMetrics": [
+      {
+        "nameMetric": "Node Control/Reboot",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Rebirth",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Next Server",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Node Control/Scan Rate",
+        "typeMetric": "Int64"
+      },
+      {
+        "nameMetric": "Properties/Hardware Make",
+        "typeMetric": "String"
+      },
+      {
+        "nameMetric": "Last Update FW",
+        "typeMetric": "DateTime"
+      },
+      {
+        "nameMetric": "Current Grid Voltage",
+        "typeMetric": "Float"
+      },
+      {
+        "nameMetric": "Outputs/LEDs/Green",
+        "typeMetric": "Boolean"
+      },
+      {
+        "nameMetric": "Outputs/LEDs/Yellow",
+        "typeMetric": "Boolean"
+      }
+    ]
+  },
+  {
+    "nodeDeviceId": "deviceSparkplugId2",
+    "nodeDeviceListMetrics": [{
+      "nameMetric": "Node Control/Reboot","typeMetric": "Boolean"},{
+      "nameMetric": "Node Control/Rebirth","typeMetric": "Boolean"},{
+      "nameMetric": "MyNodeMetric01_Int32","typeMetric": "Int32"},{
+      "nameMetric": "MyNodeMetric02_LongInt64","typeMetric": "Int64"},{
+      "nameMetric": "MyNodeMetric03_Double","typeMetric": "Double"},{
+      "nameMetric": "MyNodeMetric04_Float","typeMetric": "Float"},{
+      "nameMetric": "MyNodeMetric05_String","typeMetric":"String"},{
+      "nameMetric": "MyNodeMetric06_Json_Bytes","typeMetric": "Bytes"}
+    ]
+  }
+]
