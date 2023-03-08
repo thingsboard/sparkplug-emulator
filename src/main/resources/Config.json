@@ -1,5 +1,6 @@
 {
   "serverUrl": "tcp://localhost:1883",
+  "publishTimeout": 10000,
   "namespace": "spBv1.0",
   "groupId": "MyGroupId",
   "edgeNode": "NodeSparkplug",

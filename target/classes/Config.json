@@ -1,7 +1,0 @@
-{
-  "serverUrl": "tcp://localhost:1883",
-  "namespace": "spBv1.0",
-  "groupId": "MyGroupId",
-  "edgeNode": "NodeSparkplug",
-  "edgeNodeToken": "admin"
-}
