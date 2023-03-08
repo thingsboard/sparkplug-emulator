@@ -26,11 +26,13 @@ import org.thinghsboard.gen.sparkplug.SparkplugBProto;
 import org.thinghsboard.sparkplug.config.NodeDevicMetric;
 import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
+import org.thinghsboard.sparkplug.util.AdaptorException;
 import org.thinghsboard.sparkplug.util.JacksonUtil;
 import org.thinghsboard.sparkplug.util.MetricDataType;
 
 import java.util.Map;
 
+import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
 import static org.thinghsboard.sparkplug.util.MetricDataType.Int64;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NBIRTH;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDEATH;
@@ -80,9 +82,10 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
     /**
      * PARK_CONFIG_PATH='src/main/resources'
      * java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar SPARK_CONFIG_PATH='src/main/resources'
+     *
      * @param args
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MqttException {
         SparkPlugEmulation demoEmulation = new SparkPlugEmulation();
         demoEmulation.init(args);
         demoEmulation.run();
@@ -92,31 +95,32 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
      * @param args
      * @throws IOException
      */
-    public void init(String[] args) {
+    public void init(String[] args) throws MqttException {
         try {
             Map<String, String> env = System.getenv();
             InputStream isConfig;
             InputStream isListMetrics;
             String appPath = System.getProperty("user.dir");
             String pathConfigJson = env.get(SPARK_CONFIG_PATH_KEY);
-           if (pathConfigJson != null &&
+            if (pathConfigJson != null &&
                     new File(pathConfigJson + File.separator + config_json).isFile() &&
                     new File(pathConfigJson + File.separator + list_metrics_json).isFile()) {
 //                System.out.println("Path from any: [" + pathConfigJson +"]");
                 isConfig = new FileInputStream(pathConfigJson + File.separator + config_json);
-                isListMetrics= new FileInputStream(pathConfigJson + File.separator + list_metrics_json);
+                isListMetrics = new FileInputStream(pathConfigJson + File.separator + list_metrics_json);
             } else if (new File(appPath + File.separator + config_json).isFile() &&
-                   new File(appPath + File.separator + list_metrics_json).isFile()) {
+                    new File(appPath + File.separator + list_metrics_json).isFile()) {
 //               System.out.println("Path from appPath: [" + appPath +"]");
-               isConfig = new FileInputStream(appPath + File.separator + config_json);
-               isListMetrics= new FileInputStream(appPath + File.separator + list_metrics_json);
-           } else {
+                isConfig = new FileInputStream(appPath + File.separator + config_json);
+                isListMetrics = new FileInputStream(appPath + File.separator + list_metrics_json);
+            } else {
 //                System.out.println("Path resources");
                 isConfig = new ClassPathResource(config_json).getInputStream();
                 isListMetrics = new ClassPathResource(list_metrics_json).getInputStream();
             }
             this.sparkplugNodeConfig = JacksonUtil.fromInputToObject(isConfig, SparkplugNodeConfig.class);
-            this.nodeDevices = JacksonUtil.fromInputToCollection(isListMetrics, new TypeReference<>() {});
+            this.nodeDevices = JacksonUtil.fromInputToCollection(isListMetrics, new TypeReference<>() {
+            });
             Optional<NodeDevice> nodeOpt = this.nodeDevices.stream().filter(o -> (o.getNodeDeviceId().equals(this.sparkplugNodeConfig.getEdgeNode()))).findAny();
             if (nodeOpt.isPresent()) {
                 nodeOpt.get().setNode(true);
@@ -136,11 +140,16 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
             log.warn("{}", this.sparkplugNodeConfig);
             log.warn("{}", this.nodeDevices);
         } catch (Exception e) {
-            System.out.println("" + e.getMessage());
+            log.error("Invalidate init, " + e.getMessage());
+            if (this.client.isConnected()) {
+                this.client.disconnect();
+            }
+            this.client.close();
+            System.exit(0);
         }
     }
 
-    public void run() {
+    public void run() throws MqttException {
         try {
             // Random generator and thread pool for outgoing published messages
             executor = Executors.newFixedThreadPool(1);
@@ -165,15 +174,22 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
             msg.setId(0);
             msg.setPayload(deathBytes);
             options.setWill(topic, msg);
-            int cntConnectionFailed = 1;
-            while (!client.isConnected() && cntConnectionFailed <= 3) {
-                log.info("Start connection.... [{}]", cntConnectionFailed);
-                client.connect(options);
+            client.connect(options);
+            int cntConnectionFailed = 0;
+            while (cntConnectionFailed <= 3) {
+                if (cntConnectionFailed == 0) {
+                    log.info("Start connection.... ");
+                } else {
+                    log.info("Start connection.... [{}]", cntConnectionFailed);
+                }
                 Thread.sleep(this.publishTimeout);
                 if (!client.isConnected()) {
                     log.info("Connect failed.... [{}]", cntConnectionFailed);
+                    cntConnectionFailed++;
+                } else {
+                    log.info("Connection success!!!");
+                    break;
                 }
-                cntConnectionFailed++;
             }
             if (client.isConnected()) {
                 publishBirth();
@@ -185,50 +201,55 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
                     }
                 }
             }
-
-        } catch(Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Invalid run, " + e.getMessage());
+            if (this.client.isConnected()) {
+                this.client.disconnect();
+            }
+            this.client.close();
+            System.exit(0);
         }
     }
 
     /**
      * The DBIRTH must include every metric the device will ever report on.
      */
-    private void publishBirth() {
+    private void publishBirth() throws AdaptorException {
+        String nodeDeiceName = null;
         try {
-            synchronized(seqLock) {
+            synchronized (seqLock) {
+
                 // Reset the sequence number
                 seq = 0;
 
                 // Reset the index and time
                 index = 0;
                 long ts = calendar.getTimeInMillis();
-                long valueBdSec = getBdSeqNum();
 
                 // Create the Node BIRTH payload and set the position and other metrics
                 SparkplugBProto.Payload.Builder payloadBirthNode = SparkplugBProto.Payload.newBuilder()
                         .setTimestamp(calendar.getTimeInMillis());
-                payloadBirthNode.addMetrics(createMetric(valueBdSec, ts, keysBdSeq, Int64));
+                payloadBirthNode.addMetrics(createMetric(getBdSeqNum(), ts, keysBdSeq, Int32));
                 List<NodeDevicMetric> nodeListMetrics = this.nodeDevices.stream().filter(node -> node.isNode()).findAny().get().getNodeDeviceListMetrics();
-
-                for (NodeDevicMetric nodeMetric: nodeListMetrics) {
-                    Object value = false;
-                    payloadBirthNode.addMetrics(createMetric(value, ts, nodeMetric.getNameMetric(), nodeMetric.getTypeMetric()));
+                nodeDeiceName = this.edgeNode;
+                for (NodeDevicMetric nodeMetric : nodeListMetrics) {
+                    payloadBirthNode.addMetrics(createMetric(nodeMetric.getDefaultValue(), ts, nodeMetric.getNameMetric(), nodeMetric.getTypeMetric()));
                 }
                 if (client.isConnected()) {
-                    System.out.println("Publishing Edge Node Birth");
-                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/NBIRTH/" + edgeNode,  payloadBirthNode.build()));
+                    log.info("Publishing Edge Node Birth");
+                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/NBIRTH/" + edgeNode, payloadBirthNode.build()));
                 }
 
-                System.out.println("Publishing Device Birth");
+                log.info("Publishing Device Birth");
+//                nodeDeiceName =  deviceId;
 //                executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/DBIRTH/" + edgeNode + "/" + deviceId, payload));
 
                 // Increment the global vars
                 calendar.add(Calendar.MILLISECOND, 1);
                 index++;
             }
-        } catch(Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new AdaptorException("Invalid device [" + nodeDeiceName +"] publishBirth, " + e.getMessage());
         }
     }
 
@@ -237,14 +258,14 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
     }
 
 
-    protected long getBdSeqNum() throws Exception {
+    protected int getBdSeqNum() throws Exception {
         if (bdSeq == 256) {
             bdSeq = 0;
         }
         return bdSeq++;
     }
 
-    protected long getSeqNum() throws Exception {
+    protected int getSeqNum() throws Exception {
         if (seq == 256) {
             seq = 0;
         }

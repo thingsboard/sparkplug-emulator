@@ -35,50 +35,54 @@ import java.util.Optional;
 public class SparkplugMetricUtil {
 
     public static SparkplugBProto.Payload.Metric createMetric(Object value, long ts, String key, MetricDataType metricDataType) throws AdaptorException {
-        SparkplugBProto.Payload.Metric metric = SparkplugBProto.Payload.Metric.newBuilder()
-                .setTimestamp(ts)
-                .setName(key)
-                .setDatatype(metricDataType.toIntValue())
-                .build();
-        switch (metricDataType) {
-            case Int8:      //  (byte)
-                return metric.toBuilder().setIntValue(((Byte) value).intValue()).build();
-            case Int16:     // (short)
-            case UInt8:
-                return metric.toBuilder().setIntValue(((Short) value).intValue()).build();
-            case UInt16:     //  (int)
-            case Int32:
-                return metric.toBuilder().setIntValue(((Integer) value).intValue()).build();
-            case UInt32:     // (long)
-            case Int64:
-            case UInt64:
-            case DateTime:
-                return metric.toBuilder().setLongValue(((Long) value).longValue()).build();
-            case Float:     // (float)
-                return metric.toBuilder().setFloatValue(((Float) value).floatValue()).build();
-            case Double:     // (double)
-                return metric.toBuilder().setDoubleValue(((Double) value).doubleValue()).build();
-            case Boolean:      // (boolean)
-                return metric.toBuilder().setBooleanValue(((Boolean) value).booleanValue()).build();
-            case String:        // String)
-            case Text:
-            case UUID:
-                return metric.toBuilder().setStringValue((String) value).build();
-            case Bytes:
-                ByteString byteString = ByteString.copyFrom((byte[]) value);
-                return metric.toBuilder().setBytesValue(byteString).build();
-            case DataSet:
-                return metric.toBuilder().setDatasetValue((SparkplugBProto.Payload.DataSet) value).build();
-            case File:
-                File file = (File) value;
-                ByteString byteFileString = ByteString.copyFrom(file.getBytes());
-                return metric.toBuilder().setBytesValue(byteFileString).build();
-            case Template:
-                return metric.toBuilder().setTemplateValue((SparkplugBProto.Payload.Template) value).build();
-            case Unknown:
-                throw new AdaptorException("Invalid value for MetricDataType " + metricDataType.name());
+        try {
+            SparkplugBProto.Payload.Metric metric = SparkplugBProto.Payload.Metric.newBuilder()
+                    .setTimestamp(ts)
+                    .setName(key)
+                    .setDatatype(metricDataType.toIntValue())
+                    .build();
+            switch (metricDataType) {
+                case Int8:      //  (byte)
+                    return metric.toBuilder().setIntValue(((Byte) value).intValue()).build();
+                case Int16:     // (short)
+                case UInt8:
+                    return metric.toBuilder().setIntValue(((Short) value).intValue()).build();
+                case UInt16:     //  (int)
+                case Int32:
+                    return metric.toBuilder().setIntValue(((Integer) value).intValue()).build();
+                case UInt32:     // (long)
+                case Int64:
+                case UInt64:
+                case DateTime:
+                    return metric.toBuilder().setLongValue(((Long) value).longValue()).build();
+                case Float:     // (float)
+                    return metric.toBuilder().setFloatValue(((Float) value).floatValue()).build();
+                case Double:     // (double)
+                    return metric.toBuilder().setDoubleValue(((Double) value).doubleValue()).build();
+                case Boolean:      // (boolean)
+                    return metric.toBuilder().setBooleanValue(((Boolean) value).booleanValue()).build();
+                case String:        // String)
+                case Text:
+                case UUID:
+                    return metric.toBuilder().setStringValue((String) value).build();
+                case Bytes:
+                    ByteString byteString = ByteString.copyFrom((byte[]) value);
+                    return metric.toBuilder().setBytesValue(byteString).build();
+                case DataSet:
+                    return metric.toBuilder().setDatasetValue((SparkplugBProto.Payload.DataSet) value).build();
+                case File:
+                    File file = (File) value;
+                    ByteString byteFileString = ByteString.copyFrom(file.getBytes());
+                    return metric.toBuilder().setBytesValue(byteFileString).build();
+                case Template:
+                    return metric.toBuilder().setTemplateValue((SparkplugBProto.Payload.Template) value).build();
+                case Unknown:
+                    throw new AdaptorException("Invalid value for MetricDataType " + metricDataType.name());
+            }
+            return metric;
+        } catch (Exception e) {
+            throw new AdaptorException("Invalid metric [" + key + "] value [" + value + "]  MetricDataType [" + metricDataType.name() + "]");
         }
-        return metric;
     }
 
     public static Optional<Object> validatedValueJsonByTypeMetric(String arrayNodeStr, MetricDataType metricDataType) {

@@ -40,7 +40,7 @@
     ]
   },
   {
-    "nodeDeviceId": "deviceSparkplugId1",
+    "nodeDeviceId": "DeviceSparkplugId1",
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Node Control/Reboot",
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "nodeDeviceId": "deviceSparkplugId2",
+    "nodeDeviceId": "DeviceSparkplugId2",
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Node Control/Reboot",
