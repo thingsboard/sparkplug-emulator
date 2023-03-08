@@ -1,0 +1,136 @@
+[
+  {
+    "nodeDeviceId": "NodeSparkplug",
+    "nodeDeviceListMetrics": [
+      {
+        "nameMetric": "Node Control/Reboot",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Rebirth",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Next Server",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Scan Rate",
+        "typeMetric": "Int64",
+        "defaultValue": 92233720368547758
+      },
+      {
+        "nameMetric": "Properties/Hardware Make",
+        "typeMetric": "String",
+        "defaultValue": "Properties Hardware Make: install"
+      },
+      {
+        "nameMetric": "Last Update FW",
+        "typeMetric": "DateTime",
+        "defaultValue": 1486144502122
+      },
+      {
+        "nameMetric": "Current Grid Voltage",
+        "typeMetric": "Float",
+        "defaultValue": false
+      }
+    ]
+  },
+  {
+    "nodeDeviceId": "DeviceSparkplugId1",
+    "nodeDeviceListMetrics": [
+      {
+        "nameMetric": "Node Control/Reboot",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Rebirth",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Next Server",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Scan Rate",
+        "typeMetric": "Int64",
+        "defaultValue": 922337203685477580
+      },
+      {
+        "nameMetric": "Properties/Hardware Make",
+        "typeMetric": "String"
+      },
+      {
+        "nameMetric": "Last Update FW",
+        "typeMetric": "DateTime",
+        "defaultValue": 1486144509122
+      },
+      {
+        "nameMetric": "Current Grid Voltage",
+        "typeMetric": "Float",
+        "defaultValue": 22.45
+      },
+      {
+        "nameMetric": "Outputs/LEDs/Green",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Outputs/LEDs/Yellow",
+        "typeMetric": "Boolean",
+        "defaultValue": true
+      }
+    ]
+  },
+  {
+    "nodeDeviceId": "DeviceSparkplugId2",
+    "nodeDeviceListMetrics": [
+      {
+        "nameMetric": "Node Control/Reboot",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "Node Control/Rebirth",
+        "typeMetric": "Boolean",
+        "defaultValue": false
+      },
+      {
+        "nameMetric": "MyNodeMetric01_Int32",
+        "typeMetric": "Int32",
+        "defaultValue": 2147483647
+      },
+      {
+        "nameMetric": "MyNodeMetric02_LongInt64",
+        "typeMetric": "Int64",
+        "defaultValue": 9223372036854775
+      },
+      {
+        "nameMetric": "MyNodeMetric03_Double",
+        "typeMetric": "Double",
+        "defaultValue": 9223372036854775807
+      },
+      {
+        "nameMetric": "MyNodeMetric04_Float",
+        "typeMetric": "Float",
+        "defaultValue": 32.432
+      },
+      {
+        "nameMetric": "MyNodeMetric05_String",
+        "typeMetric": "String",
+        "defaultValue": "MyNodeMetric05 String: install"
+      },
+      {
+        "nameMetric": "MyNodeMetric06_Json_Bytes",
+        "typeMetric": "Bytes",
+        "defaultValue": [12, 4, -120]
+      }
+    ]
+  }
+]
