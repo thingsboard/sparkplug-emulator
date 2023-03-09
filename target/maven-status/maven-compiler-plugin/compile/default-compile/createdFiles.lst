@@ -50,6 +50,7 @@ org/thinghsboard/sparkplug/util/JacksonUtil.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$Metric$MetricValueExtension$Builder.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$DataSet$DataSetValue$Builder.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$PropertyValue.class
+org/thinghsboard/sparkplug/config/NodeDeviceMetric.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$Template$Parameter$ParameterValueExtension$1.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$Template$Parameter$Builder.class
 org/thinghsboard/sparkplug/util/AdaptorException.class
@@ -64,7 +65,6 @@ org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$Template$ParameterOrBuild
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$PropertySetList$Builder.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$MetaData.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$PropertySetOrBuilder.class
-org/thinghsboard/sparkplug/config/NodeDevicMetric.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$Metric$MetricValueExtension$1.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$PropertySetList$1.class
 org/thinghsboard/gen/sparkplug/SparkplugBProto$Payload$PropertySetList.class
