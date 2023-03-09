@@ -34,8 +34,8 @@
       },
       {
         "nameMetric": "Current Grid Voltage",
-        "typeMetric": "Float",
-        "defaultValue": false
+        "typeMetric": "Int32",
+        "defaultValue": 220
       }
     ]
   },
@@ -64,7 +64,8 @@
       },
       {
         "nameMetric": "Properties/Hardware Make",
-        "typeMetric": "String"
+        "typeMetric": "String",
+        "defaultValue": "Properties/Hardware Make - uninstall"
       },
       {
         "nameMetric": "Last Update FW",

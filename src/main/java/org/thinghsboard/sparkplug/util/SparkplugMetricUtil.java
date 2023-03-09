@@ -43,24 +43,24 @@ public class SparkplugMetricUtil {
                     .build();
             switch (metricDataType) {
                 case Int8:      //  (byte)
-                    return metric.toBuilder().setIntValue(((Byte) value).intValue()).build();
+                    return metric.toBuilder().setIntValue(Byte.valueOf(value.toString()).intValue()).build();
                 case Int16:     // (short)
                 case UInt8:
-                    return metric.toBuilder().setIntValue(((Short) value).intValue()).build();
+                    return metric.toBuilder().setIntValue(Short.valueOf(value.toString()).intValue()).build();
                 case UInt16:     //  (int)
                 case Int32:
-                    return metric.toBuilder().setIntValue(((Integer) value).intValue()).build();
+                    return metric.toBuilder().setIntValue(Integer.valueOf(value.toString()).intValue()).build();
                 case UInt32:     // (long)
                 case Int64:
                 case UInt64:
                 case DateTime:
-                    return metric.toBuilder().setLongValue(((Long) value).longValue()).build();
+                    return metric.toBuilder().setLongValue(Long.valueOf(value.toString()).longValue()).build();
                 case Float:     // (float)
-                    return metric.toBuilder().setFloatValue(((Float) value).floatValue()).build();
+                    return metric.toBuilder().setFloatValue((Float.valueOf(value.toString())).floatValue()).build();
                 case Double:     // (double)
-                    return metric.toBuilder().setDoubleValue(((Double) value).doubleValue()).build();
+                    return metric.toBuilder().setDoubleValue(Double.valueOf(value.toString()).doubleValue()).build();
                 case Boolean:      // (boolean)
-                    return metric.toBuilder().setBooleanValue(((Boolean) value).booleanValue()).build();
+                    return metric.toBuilder().setBooleanValue(Boolean.valueOf(value.toString()).booleanValue()).build();
                 case String:        // String)
                 case Text:
                 case UUID:
