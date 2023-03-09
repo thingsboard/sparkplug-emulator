@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,6 +30,7 @@ import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
 import org.thinghsboard.sparkplug.util.AdaptorException;
 import org.thinghsboard.sparkplug.util.JacksonUtil;
+import org.thinghsboard.sparkplug.util.MetricDataType;
 
 
 import java.util.Map;
@@ -36,32 +38,33 @@ import java.util.Map;
 import static org.thinghsboard.sparkplug.util.MetricDataType.Bytes;
 import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DBIRTH;
+import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DDATA;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NBIRTH;
+import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDATA;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDEATH;
 import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.createMetric;
+import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.nextValueChange;
 
 /**
  * An example Sparkplug B application.
  */
 @Slf4j
-public class SparkPlugEmulation extends SparkplugMqttCallback {
+public class SparkPlugEmulation {
 
     private static final String SPARK_CONFIG_PATH_KEY = "SPARK_CONFIG_PATH";
     private static final String config_json = "Config.json";
     private static final String list_metrics_json = "ListMetrics.json";
     private static final String keysBdSeq = "bdSeq";
 
-    private static final String NAMESPACE = "spBv1.0";
-    Random r = new Random();
-    protected ThreadLocalRandom random = ThreadLocalRandom.current();
+    protected static final String NAMESPACE = "spBv1.0";
     ObjectMapper mapper = new ObjectMapper();
 
     // Configuration
     //	private String serverUrl = "tcp://192.168.1.100:1883";
     private String serverUrl;
     private String namespace;
-    private String groupId;
-    private String edgeNode;
+    protected String groupId;
+    protected String edgeNode;
     private String clientId;
     private String username;
     private ExecutorService executor;
@@ -162,7 +165,7 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
             deathPayload.addMetrics(createMetric(this.getBdSeqNum(), calendar.getTimeInMillis(), this.keysBdSeq, Int32));
             byte[] deathBytes = deathPayload.build().toByteArray();
             this.client = createClient();
-            this.mqttCallback = new SparkplugMqttCallback();
+            this.mqttCallback = new SparkplugMqttCallback(this);
             this.client.setCallback(this.mqttCallback);
             MqttConnectionOptions options = new MqttConnectionOptions();
             options.setUserName(this.username);
@@ -221,7 +224,7 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
     /**
      * The DBIRTH must include every metric the device will ever report on.
      */
-    private void publishBirth() throws AdaptorException {
+    public void publishBirth() throws AdaptorException {
         String nodeDeiceName = null;
         try {
             synchronized (seqLock) {
@@ -236,7 +239,7 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
                 creatBirthMetrics(payloadBirthNode, nodeDeiceName, ts);
                 if (client.isConnected()) {
                     executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode, payloadBirthNode.build()));
-                    log.info("Publishing Edge Node Birth");
+                    log.info("Publishing [" + edgeNode + "] Birth");
                 }
 
                 SparkplugBProto.Payload.Builder payloadBirthDevice;
@@ -247,9 +250,9 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
                                 .setTimestamp(calendar.getTimeInMillis())
                                 .setSeq(getSeqNum());
                         payloadBirthDevice.addMetrics(createMetric(getBdSeqNum(), ts, this.keysBdSeq, Int32));
-                        nodeDeiceName = device .getNodeDeviceId();
+                        nodeDeiceName = device.getNodeDeviceId();
                         creatBirthMetrics(payloadBirthDevice, nodeDeiceName, ts);
-                        executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" +nodeDeiceName, payloadBirthDevice.build()));
+                        executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeiceName, payloadBirthDevice.build()));
                         log.info("Publishing [{}] Birth", device.getNodeDeviceId());
                     }
                 }
@@ -265,9 +268,9 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
                     nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
             for (NodeDeviceMetric nodeMetric : nodeListMetrics) {
                 if (Bytes.equals(nodeMetric.getTypeMetric())) {
-                    byte [] valueBytes = new byte[((ArrayList) nodeMetric.getDefaultValue()).size()];
-                    for (int i = 0; i <  ((ArrayList) nodeMetric.getDefaultValue()).size(); i++) {
-                        valueBytes[i] = ((Integer)((ArrayList) nodeMetric.getDefaultValue()).get(i)).byteValue();
+                    byte[] valueBytes = new byte[((ArrayList) nodeMetric.getDefaultValue()).size()];
+                    for (int i = 0; i < ((ArrayList) nodeMetric.getDefaultValue()).size(); i++) {
+                        valueBytes[i] = ((Integer) ((ArrayList) nodeMetric.getDefaultValue()).get(i)).byteValue();
                     }
                     nodeMetric.setDefaultValue(valueBytes);
                 }
@@ -278,36 +281,92 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
         }
     }
 
-    private void publishData() {
-        List<SparkplugBProto.Payload.Metric> nodeMetrics = new ArrayList<>();
-        List<SparkplugBProto.Payload.Metric> deviceMetrics = new ArrayList<>();
+    private void creatChangeMetrics(SparkplugBProto.Payload.Builder payload, String nodeDeiceName, long ts) throws AdaptorException {
         try {
+            List<NodeDeviceMetric> nodeListMetrics = this.nodeDevices.stream().filter(
+                    nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
+            for (NodeDeviceMetric nodeMetric : nodeListMetrics) {
+                if (nodeMetric.isAutoChange()) {
+                    Object value = nextValueChange(nodeMetric.getTypeMetric());
+                    if (value != null) {
+                        payload.addMetrics(createMetric(value, ts, nodeMetric.getNameMetric(), nodeMetric.getTypeMetric()));
+                    } else {
+                        throw new AdaptorException("Invalid next value for device [" + nodeDeiceName + "] publishDataMetrics, MetricDataType " + nodeMetric.getTypeMetric());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new AdaptorException("Invalid device [" + nodeDeiceName + "] publishDataMetrics, " + e.getMessage());
+        }
+    }
+
+    private void publishData() {
+        long ts;
+        try {
+            Map<NodeDevice, SparkplugBProto.Payload.Builder> payloadDatas = new ConcurrentHashMap<>();
+            for (NodeDevice device : this.nodeDevices) {
+                SparkplugBProto.Payload.Builder payloadData;
+                if (device.isNode()) {
+                    payloadData = SparkplugBProto.Payload.newBuilder()
+                            .setTimestamp(calendar.getTimeInMillis())
+                            .setSeq(getBdSeqNum());
+                } else {
+                    payloadData = SparkplugBProto.Payload.newBuilder()
+                            .setTimestamp(calendar.getTimeInMillis())
+                            .setSeq(getSeqNum());
+                }
+                payloadDatas.put(device, payloadData);
+            }
+
             // Loop forever publishing data every PUBLISH_PERIOD
             while (true) {
-
                 Thread.sleep(this.publishTimeout);
-
-
                 synchronized (seqLock) {
                     if (client.isConnected()) {
-
-
+                        for (NodeDevice device : this.nodeDevices) {
+                            // node/devices
+                            ts = calendar.getTimeInMillis();
+                            creatChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
+                        }
                         // Publish, increment the calendar and index and reset
                         calendar.add(Calendar.MILLISECOND, 1);
-                        if (this.index == 50) {
+                        if (this.index == this.sparkplugNodeConfig.getIndexMax()) {
                             this.index = 0;
+                            for (NodeDevice device : this.nodeDevices) {
+                                if (device.isNode()) {
+                                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
+                                } else {
+                                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
+                                }
+                                log.info("Publishing [{}] Data", device.getNodeDeviceId());
+                            }
 
-
+                            payloadDatas = new ConcurrentHashMap<>();
+                            for (NodeDevice device : this.nodeDevices) {
+                                SparkplugBProto.Payload.Builder payloadData;
+                                if (device.isNode()) {
+                                    payloadData = SparkplugBProto.Payload.newBuilder()
+                                            .setTimestamp(calendar.getTimeInMillis())
+                                            .setSeq(getBdSeqNum());
+                                } else {
+                                    payloadData = SparkplugBProto.Payload.newBuilder()
+                                            .setTimestamp(calendar.getTimeInMillis())
+                                            .setSeq(getSeqNum());
+                                }
+                                payloadDatas.put(device, payloadData);
+                            }
                         } else {
                             this.index++;
+                            log.info("Publishing index [{}] of Data", index);
                         }
                     } else {
                         log.error("Not connected. Publishing data is bad");
                     }
+
                 }
             }
-        } catch (InterruptedException e) {
-            log.error("Publishing data is bad. ", e);
+        } catch (Exception e) {
+            log.error("Publishing data is bad.... ", e);
         }
     }
 
@@ -324,6 +383,40 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
         }
         return seq++;
     }
+
+    public void messageArrived(String topic, MqttMessage mqttMsg) throws Exception {
+        log.info("Message Arrived on topic " + topic);
+        SparkplugBProto.Payload sparkplugBProtoPayload = SparkplugBProto.Payload.parseFrom(mqttMsg.getPayload());
+
+        // Debug
+        for (SparkplugBProto.Payload.Metric metric : sparkplugBProtoPayload.getMetricsList()) {
+//            if (MetricDataType.Bytes.equals(metric.getBytesValue())) {
+//            if (metric.getBytesValue() != null) {
+//                log.info("Metric " + metric.getName());
+//                for (int i = 0; i < ((byte[]) metric.getBytesValue()).length; i++) {
+//                    log.info(((byte[]) metric.getValue())[i]);
+//                }
+//            } else {
+//                System.out.println("Metric " + metric.getName() + "=" + metric.getValue());
+//            }
+        }
+
+        String[] splitTopic = topic.split("/");
+        if (splitTopic[0].equals(NAMESPACE) &&
+                splitTopic[1].equals(groupId) &&
+                splitTopic[2].equals("NCMD") &&
+                splitTopic[3].equals(edgeNode)) {
+            for (SparkplugBProto.Payload.Metric metric : sparkplugBProtoPayload.getMetricsList()) {
+                if ("Node Control/Rebirth".equals(metric.getName()) && (metric.getBooleanValue())) {
+                    publishBirth();
+                } else {
+                    System.out.println("Node Command NCMD: " + metric.getName());
+                }
+
+            }
+        }
+    }
+
 
     private class Publisher implements Runnable {
 

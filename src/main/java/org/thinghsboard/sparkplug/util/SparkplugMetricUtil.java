@@ -26,6 +26,18 @@ import org.thinghsboard.gen.sparkplug.SparkplugBProto;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.thinghsboard.sparkplug.util.MetricDataType.Bytes;
+import static org.thinghsboard.sparkplug.util.MetricDataType.DateTime;
+import static org.thinghsboard.sparkplug.util.MetricDataType.Int16;
+import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
+import static org.thinghsboard.sparkplug.util.MetricDataType.Int64;
+import static org.thinghsboard.sparkplug.util.MetricDataType.Int8;
+import static org.thinghsboard.sparkplug.util.MetricDataType.UInt32;
+import static org.thinghsboard.sparkplug.util.MetricDataType.UInt64;
+import static org.thinghsboard.sparkplug.util.MetricDataType.UInt8;
+import static org.thinghsboard.sparkplug.util.MetricDataType.fromInteger;
 
 
 /**
@@ -33,6 +45,8 @@ import java.util.Optional;
  */
 
 public class SparkplugMetricUtil {
+
+    protected static ThreadLocalRandom random = ThreadLocalRandom.current();
 
     public static SparkplugBProto.Payload.Metric createMetric(Object value, long ts, String key, MetricDataType metricDataType) throws AdaptorException {
         try {
@@ -109,6 +123,110 @@ public class SparkplugMetricUtil {
             return Optional.empty();
         }
     }
+
+    public static Object getValue(SparkplugBProto.Payload.Metric metric) {
+        switch (fromInteger(metric.getDatatype())) {
+            case Bytes:
+                return metric.getBytesValue().toByteArray();
+            case Int8:
+            case Int16:
+            case UInt8:
+            case Int32:
+                return metric.getIntValue();
+            case UInt32:     // (long)
+            case Int64:
+            case UInt64:
+            case DateTime:
+                return metric.getLongValue();
+            case Double:
+                return metric.getDoubleValue();
+            case Float:
+                return metric.getFloatValue();
+            case Boolean:
+                return metric.getBooleanValue();
+            case String:        // String)
+            case Text:
+            case UUID:
+                return metric.getStringValue();
+            case Unknown:
+        }
+        return null;
+    }
+
+
+    public static Object nextValueChange(MetricDataType metricDataType) {
+        switch (metricDataType) {
+            case Bytes:
+                return new byte[]{nextByte(), nextByte(), nextByte(), nextByte()};
+            case Int8:
+                return nextInt8();
+            case Int16:
+            case UInt8:
+                return nextInt16();
+            case Int32:
+                return nextInt32();
+            case UInt32:     // (long)
+            case Int64:
+            case UInt64:
+            case DateTime:
+                return nextInt64();
+            case Double:
+                return nextDouble();
+            case Float:
+                return nextFloat(150, 290);
+            case Boolean:
+                return nextBoolean();
+            case String:        // String)
+            case Text:
+            case UUID:
+                return nexString();
+            case Unknown:
+        }
+        return null;
+    }
+
+    private static byte nextByte() {
+        return (byte) random.nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE);
+    }
+
+    private static Byte nextInt8() {
+        return Byte.valueOf(String.valueOf(random.nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE)));
+    }
+
+
+    private static Short nextInt16() {
+        return Short.parseShort(String.valueOf(random.nextInt(Short.MIN_VALUE, Short.MAX_VALUE)));
+    }
+
+    private static Integer nextInt32() {
+        return random.nextInt(Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    private static Long nextInt64() {
+        return random.nextLong(Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    private static Double nextDouble() {
+        return random.nextDouble(Long.MIN_VALUE, Long.MAX_VALUE);
+    }
+
+    public static float nextFloat(float min, float max) {
+        if (min >= max)
+            throw new IllegalArgumentException("max must be greater than min");
+        float result = ThreadLocalRandom.current().nextFloat() * (max - min) + min;
+        if (result >= max) // correct for rounding
+            result = Float.intBitsToFloat(Float.floatToIntBits(max) - 1);
+        return result;
+    }
+
+    private static boolean nextBoolean() {
+        return random.nextBoolean();
+    }
+
+    private static String nexString() {
+        return java.util.UUID.randomUUID().toString();
+    }
+
 
     @JsonIgnoreProperties(
             value = {"fileName"})

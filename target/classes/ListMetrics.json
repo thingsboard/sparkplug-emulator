@@ -40,7 +40,7 @@
       },
       {
         "nameMetric": "Current Grid Voltage",
-        "typeMetric": "Int32",
+        "typeMetric": "Float",
         "defaultValue": 220,
         "autoChange": true
       }
@@ -50,25 +50,25 @@
     "nodeDeviceId": "DeviceSparkplugId1",
     "nodeDeviceListMetrics": [
       {
-        "nameMetric": "Node Control/Reboot",
+        "nameMetric": "Device Control/Reboot",
         "typeMetric": "Boolean",
         "defaultValue": false,
         "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Rebirth",
+        "nameMetric": "Device Control/Rebirth",
         "typeMetric": "Boolean",
         "defaultValue": false,
         "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Next Server",
+        "nameMetric": "Device Control/Next Server",
         "typeMetric": "Boolean",
         "defaultValue": false,
         "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Scan Rate",
+        "nameMetric": "Device Control/Scan Rate",
         "typeMetric": "Int64",
         "defaultValue": 922337203685477580,
         "autoChange": false
@@ -109,13 +109,13 @@
     "nodeDeviceId": "DeviceSparkplugId2",
     "nodeDeviceListMetrics": [
       {
-        "nameMetric": "Node Control/Reboot",
+        "nameMetric": "Device Control/Reboot",
         "typeMetric": "Boolean",
         "defaultValue": false,
         "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Rebirth",
+        "nameMetric": "Device Control/Rebirth",
         "typeMetric": "Boolean",
         "defaultValue": false,
         "autoChange": false

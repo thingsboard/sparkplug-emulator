@@ -20,12 +20,18 @@ Run the jar as always:
 {
   "serverUrl": "tcp://localhost:1883",
   "publishTimeout": 10000,
+  "indexMax": 50,
   "namespace": "spBv1.0",
   "groupId": "MyGroupId",
   "edgeNode": "NodeSparkplug",
   "edgeNodeToken": "admin"
 }
 ```
+*Note:
+
+-**"publishTimeout"** is the time interval between the creation of new metrics.
+
+-**"indexMax"** is the count of metric updates between a publish message sent from **Node** with SparkplugMessageType **NDATA/DDATA**.
 
 - device names and a list of metrics for each of the devices (`ListMetrics.json`)
 ```json
@@ -36,131 +42,156 @@ Run the jar as always:
       {
         "nameMetric": "Node Control/Reboot",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
         "nameMetric": "Node Control/Rebirth",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
         "nameMetric": "Node Control/Next Server",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
         "nameMetric": "Node Control/Scan Rate",
         "typeMetric": "Int64",
-        "defaultValue": 92233720368547758
+        "defaultValue": 92233720368547758,
+        "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
         "typeMetric": "String",
-        "defaultValue": "Properties Hardware Make: install"
+        "defaultValue": "Properties Hardware Make: install",
+        "autoChange": false
       },
       {
         "nameMetric": "Last Update FW",
         "typeMetric": "DateTime",
-        "defaultValue": 1486144502122
+        "defaultValue": 1486144502122,
+        "autoChange": false
       },
       {
         "nameMetric": "Current Grid Voltage",
         "typeMetric": "Float",
-        "defaultValue": false
+        "defaultValue": 220,
+        "autoChange": true
       }
     ]
   },
   {
-    "nodeDeviceId": "deviceSparkplugId1",
+    "nodeDeviceId": "DeviceSparkplugId1",
     "nodeDeviceListMetrics": [
       {
-        "nameMetric": "Node Control/Reboot",
+        "nameMetric": "Device Control/Reboot",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Rebirth",
+        "nameMetric": "Device Control/Rebirth",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Next Server",
+        "nameMetric": "Device Control/Next Server",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Scan Rate",
+        "nameMetric": "Device Control/Scan Rate",
         "typeMetric": "Int64",
-        "defaultValue": 922337203685477580
+        "defaultValue": 922337203685477580,
+        "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
-        "typeMetric": "String"
+        "typeMetric": "String",
+        "defaultValue": "Properties/Hardware Make - uninstall",
+        "autoChange": false
       },
       {
         "nameMetric": "Last Update FW",
         "typeMetric": "DateTime",
-        "defaultValue": 1486144509122
+        "defaultValue": 1486144509122,
+        "autoChange": false
       },
       {
         "nameMetric": "Current Grid Voltage",
         "typeMetric": "Float",
-        "defaultValue": 22.45
+        "defaultValue": 5.12,
+        "autoChange": true
       },
       {
         "nameMetric": "Outputs/LEDs/Green",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": true
       },
       {
         "nameMetric": "Outputs/LEDs/Yellow",
         "typeMetric": "Boolean",
-        "defaultValue": true
+        "defaultValue": true,
+        "autoChange": true
       }
     ]
   },
   {
-    "nodeDeviceId": "deviceSparkplugId2",
+    "nodeDeviceId": "DeviceSparkplugId2",
     "nodeDeviceListMetrics": [
       {
-        "nameMetric": "Node Control/Reboot",
+        "nameMetric": "Device Control/Reboot",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
-        "nameMetric": "Node Control/Rebirth",
+        "nameMetric": "Device Control/Rebirth",
         "typeMetric": "Boolean",
-        "defaultValue": false
+        "defaultValue": false,
+        "autoChange": false
       },
       {
         "nameMetric": "MyNodeMetric01_Int32",
         "typeMetric": "Int32",
-        "defaultValue": 2147483647
+        "defaultValue": 2147483647,
+        "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric02_LongInt64",
         "typeMetric": "Int64",
-        "defaultValue": 9223372036854775
+        "defaultValue": 9223372036854775,
+        "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric03_Double",
         "typeMetric": "Double",
-        "defaultValue": 9223372036854775807
+        "defaultValue": 9223372036854775807,
+        "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric04_Float",
         "typeMetric": "Float",
-        "defaultValue": 32.432
+        "defaultValue": 32.432,
+        "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric05_String",
         "typeMetric": "String",
-        "defaultValue": "MyNodeMetric05 String: install"
+        "defaultValue": "MyNodeMetric05 String: changed",
+        "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric06_Json_Bytes",
         "typeMetric": "Bytes",
-        "defaultValue": [12, 4, -120]
+        "defaultValue": [12, 4, -120],
+        "autoChange": true
       }
     ]
   }
