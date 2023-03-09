@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.thinghsboard.gen.sparkplug.SparkplugBProto;
-import org.thinghsboard.sparkplug.config.NodeDevicMetric;
+import org.thinghsboard.sparkplug.config.NodeDeviceMetric;
 import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
 import org.thinghsboard.sparkplug.util.AdaptorException;
@@ -32,7 +32,6 @@ import org.thinghsboard.sparkplug.util.JacksonUtil;
 
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 import static org.thinghsboard.sparkplug.util.MetricDataType.Bytes;
 import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
@@ -262,9 +261,9 @@ public class SparkPlugEmulation extends SparkplugMqttCallback {
 
     private void creatBirthMetrics(SparkplugBProto.Payload.Builder payload, String nodeDeiceName, long ts) throws AdaptorException {
         try {
-            List<NodeDevicMetric> nodeListMetrics = this.nodeDevices.stream().filter(
+            List<NodeDeviceMetric> nodeListMetrics = this.nodeDevices.stream().filter(
                     nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
-            for (NodeDevicMetric nodeMetric : nodeListMetrics) {
+            for (NodeDeviceMetric nodeMetric : nodeListMetrics) {
                 if (Bytes.equals(nodeMetric.getTypeMetric())) {
                     byte [] valueBytes = new byte[((ArrayList) nodeMetric.getDefaultValue()).size()];
                     for (int i = 0; i <  ((ArrayList) nodeMetric.getDefaultValue()).size(); i++) {

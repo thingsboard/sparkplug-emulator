@@ -4,8 +4,9 @@ import lombok.Data;
 import org.thinghsboard.sparkplug.util.MetricDataType;
 
 @Data
-public class NodeDevicMetric {
+public class NodeDeviceMetric {
     String nameMetric;
     MetricDataType typeMetric;
     Object defaultValue;
+    boolean autoChange;
 }
