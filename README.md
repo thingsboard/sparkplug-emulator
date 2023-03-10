@@ -1,7 +1,6 @@
 # This is a sample that demonstrates how a SparkplugEmulation application receive information about configuration, device names and a list of metrics for each of the devices.
 
 You can find more information about this **SparkplugEmulation application** with **Thingsboard** [here](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/)
-You can find more information about this **SparkplugEmulation application** with **Thingsboard** [here](http://0.0.0.0:4000/docs/reference/mqtt-sparkplug-api/)
 
 
 For the successful operation of the SparkplugEmulation application, two files in json format are required:
