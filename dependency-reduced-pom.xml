@@ -44,7 +44,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>org.thinghsboard.sparkplug.SparkPlugEmulation</mainClass>
+                  <mainClass>org.thinghsboard.sparkplug.SparkplugEmulation</mainClass>
                 </transformer>
               </transformers>
             </configuration>

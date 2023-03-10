@@ -1,5 +1,10 @@
-# This is a sample that demonstrates how a SparkPlugEmulation application receive information about configuration, device names and a list of metrics for each of the devices.
-For the successful operation of the SparkPlugEmulation application, two files in json format are required:
+# This is a sample that demonstrates how a SparkplugEmulation application receive information about configuration, device names and a list of metrics for each of the devices.
+
+You can find more information about this **SparkplugEmulation application** with **Thingsboard** [here](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/)
+You can find more information about this **SparkplugEmulation application** with **Thingsboard** [here](http://0.0.0.0:4000/docs/reference/mqtt-sparkplug-api/)
+
+
+For the successful operation of the SparkplugEmulation application, two files in json format are required:
 - configuration (`Config.json`);
 - device names and a list of metrics for each of the devices (`ListMetrics.json`);
   
@@ -197,7 +202,7 @@ Run the jar as always:
   }
 ]
 ```
-```java
+```shell
     private static final String config_json = "Config.json";
     
     InputStream isConfig = new ClassPathResource(config_json).getInputStream();    
@@ -206,37 +211,37 @@ Run the jar as always:
     
     InputStream isListMetrics = new ClassPathResource(list_metrics_json).getInputStream();    
 ```
-## Without using SparkPlugEmulation environment variables
-- FilePath: <span style="color:green">/home/SparkPlugB_Thingsboard/sparkplug</span> ;
+## Without using SparkplugEmulation environment variables
+- FilePath: <span style="color:green">/home/SparkplugB_Thingsboard/sparkplug</span> ;
 - File with configuration: <span style="color:brown">Config.json</span>;
 - File with device names and a list of metrics for each of the devices: <span style="color:brown">ListMetrics.json</span>;
 
 
-## Using environment variables with SparkPlugEmulation
+## Using environment variables with SparkplugEmulation
 
-This is a sample application that demonstrates how to set up a SparkPlugEmulation application through an environment
+This is a sample application that demonstrates how to set up a SparkplugEmulation application through an environment
 variables.
 It expects to receive information about configuration, device names and a list of metrics for each of the devices.
-- FilePath: <span style="color:green">/home/SparkPlugB_Thingsboard/sparkplug</span> ;
+- FilePath: <span style="color:green">/home/SparkplugB_Thingsboard/sparkplug</span> ;
 - File with configuration: <span style="color:brown">Config.json</span>;
 - File with device names and a list of metrics for each of the devices: <span style="color:brown">ListMetrics.json</span>;
 
 ### Environment variable ih Run/Debug Configuration project
 ```
-    SPARK_CONFIG_PATH=/home/SparkPlugB_Thingsboard/sparkplug
+    SPARK_CONFIG_PATH=/home/SparkplugB_Thingsboard/sparkplug
 ```
 
 ### Set Environment variable option while running JAR
 You can set environment variables by assigning them on the command line.
-For example, to set `SPARK_CONFIG_PATH` to `/home/SparkPlugB_Thingsboard/sparkplug`, you could
+For example, to set `SPARK_CONFIG_PATH` to `/home/SparkplugB_Thingsboard/sparkplug`, you could
 run this application as follows.
 - On linux, execute:
 ```
-    export SPARK_CONFIG_PATH="/home/SparkPlugB_Thingsboard/sparkplug"
+    export SPARK_CONFIG_PATH="/home/SparkplugB_Thingsboard/sparkplug"
 ```
 - On windows, execute:
 ```
-    C:\>SomeDir>set SPARK_CONFIG_PATH="/home/SparkPlugB_Thingsboard/sparkplug"
+    C:\>SomeDir>set SPARK_CONFIG_PATH="/home/SparkplugB_Thingsboard/sparkplug"
 ```
 - then run the jar as always:
 ```

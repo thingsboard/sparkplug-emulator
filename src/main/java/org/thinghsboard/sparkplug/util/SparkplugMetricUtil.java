@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2023 The Thingsboard Authors
+ * Copyright © ${project.inceptionYear}-2023 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,22 +28,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.thinghsboard.sparkplug.util.MetricDataType.Bytes;
-import static org.thinghsboard.sparkplug.util.MetricDataType.DateTime;
-import static org.thinghsboard.sparkplug.util.MetricDataType.Int16;
-import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
-import static org.thinghsboard.sparkplug.util.MetricDataType.Int64;
-import static org.thinghsboard.sparkplug.util.MetricDataType.Int8;
-import static org.thinghsboard.sparkplug.util.MetricDataType.UInt32;
-import static org.thinghsboard.sparkplug.util.MetricDataType.UInt64;
-import static org.thinghsboard.sparkplug.util.MetricDataType.UInt8;
 import static org.thinghsboard.sparkplug.util.MetricDataType.fromInteger;
 
 
 /**
  * Provides utility methods for SparkplugB MQTT Payload Metric.
  */
-
+/**
+ * Created by nickAS21 on 10.01.23
+ */
 public class SparkplugMetricUtil {
 
     protected static ThreadLocalRandom random = ThreadLocalRandom.current();
