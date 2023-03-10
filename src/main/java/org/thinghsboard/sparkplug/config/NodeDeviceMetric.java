@@ -24,7 +24,7 @@ import org.thinghsboard.sparkplug.util.MetricDataType;
 @Data
 public class NodeDeviceMetric {
     String nameMetric;
-    MetricDataType typeMetric;
-    Object defaultValue;
+    MetricDataType dataType;
+    Object value;
     boolean autoChange;
 }

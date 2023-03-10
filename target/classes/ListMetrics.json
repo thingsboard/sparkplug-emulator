@@ -4,44 +4,44 @@
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Node Control/Reboot",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Node Control/Rebirth",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Node Control/Next Server",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Node Control/Scan Rate",
-        "typeMetric": "Int64",
-        "defaultValue": 92233720368547758,
+        "dataType": "Int64",
+        "value": 92233720368547758,
         "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
-        "typeMetric": "String",
-        "defaultValue": "Properties Hardware Make: install",
+        "dataType": "String",
+        "value": "Properties Hardware Make: install",
         "autoChange": false
       },
       {
         "nameMetric": "Last Update FW",
-        "typeMetric": "DateTime",
-        "defaultValue": 1486144502122,
+        "dataType": "DateTime",
+        "value": 1486144502122,
         "autoChange": false
       },
       {
         "nameMetric": "Current Grid Voltage",
-        "typeMetric": "Float",
-        "defaultValue": 220,
+        "dataType": "Float",
+        "value": 220,
         "autoChange": true
       }
     ]
@@ -51,56 +51,56 @@
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Device Control/Reboot",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Device Control/Rebirth",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Device Control/Next Server",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Device Control/Scan Rate",
-        "typeMetric": "Int64",
-        "defaultValue": 922337203685477580,
+        "dataType": "Int64",
+        "value": 922337203685477580,
         "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
-        "typeMetric": "String",
-        "defaultValue": "Properties/Hardware Make - uninstall",
+        "dataType": "String",
+        "value": "Thinsboard Sparkplug™ B version: 3.5",
         "autoChange": false
       },
       {
         "nameMetric": "Last Update FW",
-        "typeMetric": "DateTime",
-        "defaultValue": 1486144509122,
+        "dataType": "DateTime",
+        "value": 486144501056,
         "autoChange": false
       },
       {
         "nameMetric": "Current Grid Voltage",
-        "typeMetric": "Float",
-        "defaultValue": 5.12,
+        "dataType": "Float",
+        "value": 5.12,
         "autoChange": true
       },
       {
         "nameMetric": "Outputs/LEDs/Green",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": true
       },
       {
         "nameMetric": "Outputs/LEDs/Yellow",
-        "typeMetric": "Boolean",
-        "defaultValue": true,
+        "dataType": "Boolean",
+        "value": true,
         "autoChange": true
       }
     ]
@@ -110,50 +110,50 @@
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Device Control/Reboot",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "Device Control/Rebirth",
-        "typeMetric": "Boolean",
-        "defaultValue": false,
+        "dataType": "Boolean",
+        "value": false,
         "autoChange": false
       },
       {
         "nameMetric": "MyNodeMetric01_Int32",
-        "typeMetric": "Int32",
-        "defaultValue": 2147483647,
+        "dataType": "Int32",
+        "value": 2147483647,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric02_LongInt64",
-        "typeMetric": "Int64",
-        "defaultValue": 9223372036854775,
+        "dataType": "Int64",
+        "value": 9223372036854775,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric03_Double",
-        "typeMetric": "Double",
-        "defaultValue": 9223372036854775807,
+        "dataType": "Double",
+        "value": 9223372036854775807,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric04_Float",
-        "typeMetric": "Float",
-        "defaultValue": 32.432,
+        "dataType": "Float",
+        "value": 32.432,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric05_String",
-        "typeMetric": "String",
-        "defaultValue": "MyNodeMetric05 String: changed",
+        "dataType": "String",
+        "value": "MyNodeMetric05 String: changed",
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric06_Json_Bytes",
-        "typeMetric": "Bytes",
-        "defaultValue": [12, 4, -120],
+        "dataType": "Bytes",
+        "value": [12, 4, -120],
         "autoChange": true
       }
     ]

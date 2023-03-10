@@ -215,6 +215,16 @@ public class SparkplugEmulation {
                     }
                 }
                 publishData();
+            } else {
+                log.error("Connect failed.... ");
+                log.error("\nCheck:\n" +
+                        "- parameters in \"Config.json\"\n" +
+                        "- is the server running at the address [{}]\n" +
+                        "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", this.serverUrl);
+                if (this.client.isConnected()) {
+                    this.client.disconnect();
+                }
+                this.client.close();
             }
 
 
@@ -283,14 +293,14 @@ public class SparkplugEmulation {
             List<NodeDeviceMetric> nodeListMetrics = this.nodeDevices.stream().filter(
                     nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
             for (NodeDeviceMetric nodeMetric : nodeListMetrics) {
-                if (Bytes.equals(nodeMetric.getTypeMetric())) {
-                    byte[] valueBytes = new byte[((ArrayList) nodeMetric.getDefaultValue()).size()];
-                    for (int i = 0; i < ((ArrayList) nodeMetric.getDefaultValue()).size(); i++) {
-                        valueBytes[i] = ((Integer) ((ArrayList) nodeMetric.getDefaultValue()).get(i)).byteValue();
+                if (Bytes.equals(nodeMetric.getDataType())) {
+                    byte[] valueBytes = new byte[((ArrayList) nodeMetric.getValue()).size()];
+                    for (int i = 0; i < ((ArrayList) nodeMetric.getValue()).size(); i++) {
+                        valueBytes[i] = ((Integer) ((ArrayList) nodeMetric.getValue()).get(i)).byteValue();
                     }
-                    nodeMetric.setDefaultValue(valueBytes);
+                    nodeMetric.setValue(valueBytes);
                 }
-                payload.addMetrics(createMetric(nodeMetric.getDefaultValue(), ts, nodeMetric.getNameMetric(), nodeMetric.getTypeMetric()));
+                payload.addMetrics(createMetric(nodeMetric.getValue(), ts, nodeMetric.getNameMetric(), nodeMetric.getDataType()));
             }
         } catch (Exception e) {
             throw new AdaptorException("Invalid device [" + nodeDeiceName + "] publishBirthMetrics, " + e.getMessage());
@@ -303,11 +313,11 @@ public class SparkplugEmulation {
                     nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
             for (NodeDeviceMetric nodeMetric : nodeListMetrics) {
                 if (nodeMetric.isAutoChange()) {
-                    Object value = nextValueChange(nodeMetric.getTypeMetric());
+                    Object value = nextValueChange(nodeMetric.getDataType());
                     if (value != null) {
-                        payload.addMetrics(createMetric(value, ts, nodeMetric.getNameMetric(), nodeMetric.getTypeMetric()));
+                        payload.addMetrics(createMetric(value, ts, nodeMetric.getNameMetric(), nodeMetric.getDataType()));
                     } else {
-                        throw new AdaptorException("Invalid next value for device [" + nodeDeiceName + "] publishDataMetrics, MetricDataType " + nodeMetric.getTypeMetric());
+                        throw new AdaptorException("Invalid next value for device [" + nodeDeiceName + "] publishDataMetrics, MetricDataType " + nodeMetric.getDataType());
                     }
                 }
             }
