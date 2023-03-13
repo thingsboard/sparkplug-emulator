@@ -52,6 +52,7 @@ import static org.thinghsboard.sparkplug.util.SparkplugConstatns.CONFIG_JSON;
 import static org.thinghsboard.sparkplug.util.SparkplugConstatns.KEYS_BD_SEQ;
 import static org.thinghsboard.sparkplug.util.SparkplugConstatns.LIST_METRICS_JSON;
 import static org.thinghsboard.sparkplug.util.SparkplugConstatns.SPARK_CONFIG_PATH_KEY;
+import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DBIRTH;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DDATA;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NBIRTH;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDATA;
@@ -279,7 +280,7 @@ public class SparkplugEmulation {
             if (edgeNode.equals(nodeDeviceId)) {
                 topic = NAMESPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode;
             } else {
-                topic = NAMESPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
+                topic = NAMESPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
             }
             executor.execute(new Publisher(topic, payloadBirthNode.build()));
             log.info("Publishing [" + nodeDeviceId + "] Birth");
