@@ -37,11 +37,11 @@ import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.parseTopicPubli
  * Created by nickAS21 on 10.01.23
  */
 @Slf4j
-public class SparkplugMqttCallback  implements MqttCallback {
+public class SparkplugMqttCallback implements MqttCallback {
 
     private SparkplugEmulation sparkPlugEmulation;
 
-    public SparkplugMqttCallback (SparkplugEmulation sparkPlugEmulation) {
+    public SparkplugMqttCallback(SparkplugEmulation sparkPlugEmulation) {
         this.sparkPlugEmulation = sparkPlugEmulation;
     }
 
@@ -62,18 +62,18 @@ public class SparkplugMqttCallback  implements MqttCallback {
         log.info("Message Arrived on topic " + topic);
         SparkplugBProto.Payload sparkplugBProtoPayload = SparkplugBProto.Payload.parseFrom(mqttMsg.getPayload());
         SparkplugTopic sparkplugTopic = this.sparkPlugEmulation.validateTopic(parseTopicPublish(topic));
+        String nodeDeviceId = sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId();
         // Debug
-        log.info("Command: [{}]  nodeDeviceId: [{}]", sparkplugTopic.getType().name() , sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId());
+        log.info("Command: [{}]  nodeDeviceId: [{}]", sparkplugTopic.getType().name(), sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId());
         for (SparkplugBProto.Payload.Metric metric : sparkplugBProtoPayload.getMetricsList()) {
-                log.info("Metric [{}] value [{}]", metric.getName(), getValue(metric));
+            log.info("Metric [{}] value [{}]", metric.getName(), getValue(metric));
         }
-
         if (NCMD.equals(sparkplugTopic.getType()) || DCMD.equals(sparkplugTopic.getType())) {
-           for (SparkplugBProto.Payload.Metric metric : sparkplugBProtoPayload.getMetricsList()) {
-                if ("Node Control/Rebirth".equals(metric.getName()) && (metric.getBooleanValue())) {
-                    this.sparkPlugEmulation.publishBirth(this.sparkPlugEmulation.edgeNode);
-                } else if ("Device Control/Rebirth".equals(metric.getName()) && (metric.getBooleanValue())) {
-                    this.sparkPlugEmulation.publishBirth(sparkplugTopic.getDeviceId());
+            for (SparkplugBProto.Payload.Metric metric : sparkplugBProtoPayload.getMetricsList()) {
+                if (("Node Control/Rebirth".equals(metric.getName()) || "Node Control/Reboot".equals(metric.getName()) ||
+                        "Device Control/Rebirth".equals(metric.getName()) || "Device Control/Reboot".equals(metric.getName()))
+                        && (metric.getBooleanValue())) {
+                    this.sparkPlugEmulation.publishBirth(nodeDeviceId);
                 }
             }
         }

@@ -82,7 +82,7 @@ public class SparkplugEmulation {
     private String clientId;
     private String username;
     private ExecutorService executor;
-    private MqttAsyncClient client;
+    public MqttAsyncClient client;
 
 
     private SparkplugNodeConfig sparkplugNodeConfig;
@@ -202,7 +202,7 @@ public class SparkplugEmulation {
                 }
                 publishData();
             } else {
-                finishWithError();
+                clientFinishWithError();
             }
         } catch (Exception e) {
             log.error("Invalid run, " + e.getMessage());
@@ -397,7 +397,7 @@ public class SparkplugEmulation {
             }
         } catch (MqttException e) {
             if (e.getReasonCode() != MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS) {
-                finishWithError();
+                clientFinishWithError();
             }
         }
         if (!client.isConnected()) {
@@ -421,12 +421,16 @@ public class SparkplugEmulation {
         return client.isConnected();
     }
 
-    private void finishWithError() {
+    private void clientFinishWithError() {
         log.error("Connect failed.... ");
         log.error("\nCheck:\n" +
                 "- parameters in \"Config.json\"\n" +
                 "- is the server running at the address [{}]\n" +
                 "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", this.serverUrl);
+        clientClose ();
+    }
+
+    public void clientClose () {
         if (this.client.isConnected()) {
             try {
                 this.client.disconnect();
