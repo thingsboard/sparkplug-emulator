@@ -18,6 +18,7 @@ package org.thinghsboard.sparkplug;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
+import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -29,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,11 +60,13 @@ import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDEATH;
 import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.createMetric;
 import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.nextValueChange;
 import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.NAMESPACE;
+import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.parseTopicPublish;
 import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.validateNameSpace;
 
 /**
  * An example Sparkplug B application.
  */
+
 /**
  * Created by nickAS21 on 10.01.23
  */
@@ -88,7 +90,6 @@ public class SparkplugEmulation {
 
     private long publishTimeout;                    // Publish period in milliseconds
     private int index;
-    private Calendar calendar;
 
     private int bdSeq;
     private int seq;
@@ -150,7 +151,6 @@ public class SparkplugEmulation {
             this.username = this.sparkplugNodeConfig.getEdgeNodeToken();
             this.publishTimeout = this.sparkplugNodeConfig.getPublishTimeout();
             this.index = 0;
-            this.calendar = Calendar.getInstance();
             this.bdSeq = 0;
             this.seq = 0;
             this.seqLock = new Object();
@@ -173,8 +173,8 @@ public class SparkplugEmulation {
 
             // Build up DEATH payload - note DEATH payloads
             SparkplugBProto.Payload.Builder deathPayload = SparkplugBProto.Payload.newBuilder()
-                    .setTimestamp(calendar.getTimeInMillis());
-            deathPayload.addMetrics(createMetric(this.getBdSeqNum(), calendar.getTimeInMillis(), KEYS_BD_SEQ, Int32));
+                    .setTimestamp(System.currentTimeMillis());
+            deathPayload.addMetrics(createMetric(this.getBdSeqNum(),System.currentTimeMillis(), KEYS_BD_SEQ, Int32));
             byte[] deathBytes = deathPayload.build().toByteArray();
             this.client = createClient();
             this.mqttCallback = new SparkplugMqttCallback(this);
@@ -190,22 +190,7 @@ public class SparkplugEmulation {
             msg.setPayload(deathBytes);
             options.setWill(topic, msg);
             client.connect(options);
-            int cntConnectionFailed = 0;
-            while (cntConnectionFailed <= 3) {
-                if (cntConnectionFailed == 0) {
-                    log.info("Start connection.... ");
-                } else {
-                    log.info("Start connection.... [{}]", cntConnectionFailed);
-                }
-                Thread.sleep(this.publishTimeout);
-                if (!client.isConnected()) {
-                    log.info("Connect failed.... [{}]", cntConnectionFailed);
-                    cntConnectionFailed++;
-                } else {
-                    log.info("Connection success!!!");
-                    break;
-                }
-            }
+            clientReconnect();
             if (client.isConnected()) {
                 publishBirth();
                 // Subscribe to control/command messages for both the edge of network node and the attached devices
@@ -217,18 +202,8 @@ public class SparkplugEmulation {
                 }
                 publishData();
             } else {
-                log.error("Connect failed.... ");
-                log.error("\nCheck:\n" +
-                        "- parameters in \"Config.json\"\n" +
-                        "- is the server running at the address [{}]\n" +
-                        "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", this.serverUrl);
-                if (this.client.isConnected()) {
-                    this.client.disconnect();
-                }
-                this.client.close();
+                finishWithError();
             }
-
-
         } catch (Exception e) {
             log.error("Invalid run, " + e.getMessage());
             if (this.client.isConnected()) {
@@ -250,7 +225,7 @@ public class SparkplugEmulation {
         String nodeDeiceName = null;
         try {
             synchronized (seqLock) {
-                long ts = calendar.getTimeInMillis();
+                long ts = System.currentTimeMillis();
                 if (nodeDeviceNames.length == 0) {
                     // Create the Node/Devices BIRTH payload with metrics
                     SparkplugBProto.Payload.Builder payloadBirthDevice;
@@ -272,7 +247,7 @@ public class SparkplugEmulation {
         try {
             // Create the Node/Device BIRTH payload with metrics
             SparkplugBProto.Payload.Builder payloadBirthNode = SparkplugBProto.Payload.newBuilder()
-                    .setTimestamp(calendar.getTimeInMillis())
+                    .setTimestamp(System.currentTimeMillis())
                     .setSeq(getBdSeqNum());
             payloadBirthNode.addMetrics(createMetric(getBdSeqNum(), ts, KEYS_BD_SEQ, Int32));
             creatBirthMetrics(payloadBirthNode, nodeDeviceId, ts);
@@ -283,7 +258,6 @@ public class SparkplugEmulation {
                 topic = NAMESPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
             }
             executor.execute(new Publisher(topic, payloadBirthNode.build()));
-            log.info("Publishing [" + nodeDeviceId + "] Birth");
         } catch (Exception e) {
             throw new AdaptorException("Invalid device [" + nodeDeviceId + "] publishBirth, " + e.getMessage());
         }
@@ -335,11 +309,11 @@ public class SparkplugEmulation {
                 SparkplugBProto.Payload.Builder payloadData;
                 if (device.isNode()) {
                     payloadData = SparkplugBProto.Payload.newBuilder()
-                            .setTimestamp(calendar.getTimeInMillis())
+                            .setTimestamp(System.currentTimeMillis())
                             .setSeq(getBdSeqNum());
                 } else {
                     payloadData = SparkplugBProto.Payload.newBuilder()
-                            .setTimestamp(calendar.getTimeInMillis())
+                            .setTimestamp(System.currentTimeMillis())
                             .setSeq(getSeqNum());
                 }
                 payloadDatas.put(device, payloadData);
@@ -349,47 +323,39 @@ public class SparkplugEmulation {
             while (true) {
                 Thread.sleep(this.publishTimeout);
                 synchronized (seqLock) {
-                    if (client.isConnected()) {
+                    ts = System.currentTimeMillis();
+                    for (NodeDevice device : this.nodeDevices) {
+                        // node/devices
+                        creatChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
+                    }
+                    if (this.index >= this.sparkplugNodeConfig.getIndexMax()) {
+                        this.index = 0;
                         for (NodeDevice device : this.nodeDevices) {
-                            // node/devices
-                            ts = calendar.getTimeInMillis();
-                            creatChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
+                            if (device.isNode()) {
+                                executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
+                            } else {
+                                executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
+                            }
                         }
-                        // Publish, increment the calendar and index and reset
-                        calendar.add(Calendar.MILLISECOND, 1);
-                        if (this.index == this.sparkplugNodeConfig.getIndexMax()) {
-                            this.index = 0;
-                            for (NodeDevice device : this.nodeDevices) {
-                                if (device.isNode()) {
-                                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
-                                } else {
-                                    executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
-                                }
-                                log.info("Publishing [{}] Data", device.getNodeDeviceId());
-                            }
 
-                            payloadDatas = new ConcurrentHashMap<>();
-                            for (NodeDevice device : this.nodeDevices) {
-                                SparkplugBProto.Payload.Builder payloadData;
-                                if (device.isNode()) {
-                                    payloadData = SparkplugBProto.Payload.newBuilder()
-                                            .setTimestamp(calendar.getTimeInMillis())
-                                            .setSeq(getBdSeqNum());
-                                } else {
-                                    payloadData = SparkplugBProto.Payload.newBuilder()
-                                            .setTimestamp(calendar.getTimeInMillis())
-                                            .setSeq(getSeqNum());
-                                }
-                                payloadDatas.put(device, payloadData);
+                        payloadDatas = new ConcurrentHashMap<>();
+                        for (NodeDevice device : this.nodeDevices) {
+                            SparkplugBProto.Payload.Builder payloadData;
+                            if (device.isNode()) {
+                                payloadData = SparkplugBProto.Payload.newBuilder()
+                                        .setTimestamp(System.currentTimeMillis())
+                                        .setSeq(getBdSeqNum());
+                            } else {
+                                payloadData = SparkplugBProto.Payload.newBuilder()
+                                        .setTimestamp(System.currentTimeMillis())
+                                        .setSeq(getSeqNum());
                             }
-                        } else {
-                            this.index++;
-                            log.info("Publishing index [{}] of Data", index);
+                            payloadDatas.put(device, payloadData);
                         }
                     } else {
-                        log.error("Not connected. Publishing data is bad");
+                        this.index++;
+                        log.info("Publishing index [{}] of Data", index);
                     }
-
                 }
             }
         } catch (Exception e) {
@@ -415,13 +381,60 @@ public class SparkplugEmulation {
         if (!NAMESPACE.equals(sparkplugTopic.getNamespace())) {
             throw new AdaptorException("The namespace [" + sparkplugTopic.getNamespace() + "] is not valid and must be [" + NAMESPACE + "] for the Sparkplug™ B version.");
         }
-       if (!this.groupId.equals(sparkplugTopic.getGroupId())) {
+        if (!this.groupId.equals(sparkplugTopic.getGroupId())) {
             throw new AdaptorException("The groupId [" + sparkplugTopic.getGroupId() + "] is not valid and must be [" + this.groupId + "].");
         }
-       if (!this.edgeNode.equals(sparkplugTopic.getEdgeNodeId())) {
+        if (!this.edgeNode.equals(sparkplugTopic.getEdgeNodeId())) {
             throw new AdaptorException("The edgeNode [" + sparkplugTopic.getEdgeNodeId() + "] is not valid and must be [" + this.edgeNode + "] for the Sparkplug™ B version.");
         }
-        return  sparkplugTopic;
+        return sparkplugTopic;
+    }
+
+    private boolean clientReconnect() throws InterruptedException {
+        try {
+            if (!client.isConnected()) {
+                client.reconnect();
+            }
+        } catch (MqttException e) {
+            if (e.getReasonCode() != MqttClientException.REASON_CODE_CONNECT_IN_PROGRESS) {
+                finishWithError();
+            }
+        }
+        if (!client.isConnected()) {
+            int cntConnectionFailed = 0;
+            while (cntConnectionFailed <= 3) {
+                if (cntConnectionFailed == 0) {
+                    log.info("Start connection.... ");
+                } else {
+                    log.info("Start connection.... [{}]", cntConnectionFailed);
+                }
+                Thread.sleep(this.publishTimeout);
+                if (!client.isConnected()) {
+                    log.info("Connect failed.... [{}]", cntConnectionFailed);
+                    cntConnectionFailed++;
+                } else {
+                    log.info("Connection success!!!");
+                    break;
+                }
+            }
+        }
+        return client.isConnected();
+    }
+
+    private void finishWithError() {
+        log.error("Connect failed.... ");
+        log.error("\nCheck:\n" +
+                "- parameters in \"Config.json\"\n" +
+                "- is the server running at the address [{}]\n" +
+                "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", this.serverUrl);
+        if (this.client.isConnected()) {
+            try {
+                this.client.disconnect();
+                this.client.close();
+            } catch (MqttException e) {
+                log.error("", e);
+            }
+        }
     }
 
     private class Publisher implements Runnable {
@@ -436,11 +449,18 @@ public class SparkplugEmulation {
 
         public void run() {
             try {
-                client.publish(topic, outboundPayload.toByteArray(), 0, false);
-            } catch (MqttException mqttException) {
+                SparkplugTopic sparkplugTopic = parseTopicPublish(topic);
+                String nodeDeviceId = sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId();
+                if (clientReconnect()) {
+                    client.publish(topic, outboundPayload.toByteArray(), 0, false);
+                    log.info("Publishing [{}] {}", nodeDeviceId, sparkplugTopic.getType().name());
+                } else {
+                    log.error("Client is not connected. Publishing [{}] {} bad", nodeDeviceId, sparkplugTopic.getType().name());
+                }
+            } catch (MqttException | InterruptedException | AdaptorException mqttException) {
                 mqttException.printStackTrace();
             }
         }
     }
-
 }
+
