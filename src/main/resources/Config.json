@@ -3,8 +3,6 @@
   "groupId": "GroupIdSparkplug",
   "edgeNode": "NodeSparkplug",
   "edgeNodeToken": "admin",
-  "userName": "",
-  "passWord": "",
   "publishTimeout": 10000,
   "indexMax": 50
 }

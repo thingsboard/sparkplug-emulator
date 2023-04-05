@@ -23,12 +23,11 @@ Run the jar as always:
 ```json
 {
   "serverUrl": "tcp://localhost:1883",
-  "publishTimeout": 10000,
-  "indexMax": 50,
-  "namespace": "spBv1.0",
-  "groupId": "MyGroupId",
+  "groupId": "GroupIdSparkplug",
   "edgeNode": "NodeSparkplug",
-  "edgeNodeToken": "admin"
+  "edgeNodeToken": "admin",
+  "publishTimeout": 10000,
+  "indexMax": 50
 }
 ```
 *Note:
@@ -37,7 +36,7 @@ Run the jar as always:
 
 -**"indexMax"** is the count of metric updates between a publish message sent from **Node** with SparkplugMessageType **NDATA/DDATA**.
 
-- device names and a list of metrics for each of the devices (`ListMetrics.json`)
+- device names and a list of metrics for each of the devices (`Metrics.json`)
 ```json
 [
   {
@@ -201,49 +200,46 @@ Run the jar as always:
   }
 ]
 ```
-```shell
-    private static final String config_json = "Config.json";
-    
-    InputStream isConfig = new ClassPathResource(config_json).getInputStream();    
 
-    private static final String list_metrics_json = "ListMetrics.json";
-    
-    InputStream isListMetrics = new ClassPathResource(list_metrics_json).getInputStream();    
-```
 ## Without using SparkplugEmulation environment variables
 - FilePath: <span style="color:green">/home/SparkplugB_Thingsboard/sparkplug</span> ;
 - File with configuration: <span style="color:brown">Config.json</span>;
-- File with device names and a list of metrics for each of the devices: <span style="color:brown">ListMetrics.json</span>;
+- File with device names and a list of metrics for each of the devices: <span style="color:brown">Metrics.json</span>;
 
 
 ## Using environment variables with SparkplugEmulation
 
-This is a sample application that demonstrates how to set up a SparkplugEmulation application through an environment
-variables.
-It expects to receive information about configuration, device names and a list of metrics for each of the devices.
-- FilePath: <span style="color:green">/home/SparkplugB_Thingsboard/sparkplug</span> ;
-- File with configuration: <span style="color:brown">Config.json</span>;
-- File with device names and a list of metrics for each of the devices: <span style="color:brown">ListMetrics.json</span>;
-
-### Environment variable ih Run/Debug Configuration project
-```
-    SPARK_CONFIG_PATH=/home/SparkplugB_Thingsboard/sparkplug
-```
-
-### Set Environment variable option while running JAR
-You can set environment variables by assigning them on the command line.
-For example, to set `SPARK_CONFIG_PATH` to `/home/SparkplugB_Thingsboard/sparkplug`, you could
-run this application as follows.
+### Set Environment variable option
 - On linux, execute:
 ```
-    export SPARK_CONFIG_PATH="/home/SparkplugB_Thingsboard/sparkplug"
+    export SPARKPLUG_CLIENT_CONFIG_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Config.json"
+    export SPARKPLUG_CLIENT_METRICS_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Metrics.json"
+    export SPARKPLUG_SERVER_URL="tcp://192.168.1.100:1883"
+    export SPARKPLUG_CLIENT_GROUP_ID="GroupIdSparkplug"
+    export SPARKPLUG_CLIENT_NODE_ID="NodeSparkplug"
+    export SPARKPLUG_CLIENT_NODE_TOKEN="admin"
+    export SPARKPLUG_PUBLISH_TIME="10000"
+    export SPARKPLUG_INDEX_MAX="50"
 ```
 - On windows, execute:
 ```
-    C:\>SomeDir>set SPARK_CONFIG_PATH="/home/SparkplugB_Thingsboard/sparkplug"
+    C:\>SomeDir>set SPARKPLUG_CLIENT_CONFIG_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Config.json"
+    C:\>SomeDir>set SPARKPLUG_CLIENT_METRICS_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Metrics.json"
+    C:\>SomeDir>set SPARKPLUG_SERVER_URL="tcp://192.168.1.100:1883"
+    C:\>SomeDir>set SPARKPLUG_CLIENT_GROUP_ID="GroupIdSparkplug"
+    C:\>SomeDir>set SPARKPLUG_CLIENT_NODE_ID="NodeSparkplug"
+    C:\>SomeDir>set SPARKPLUG_CLIENT_NODE_TOKEN="admin"
+    C:\>SomeDir>set SPARKPLUG_PUBLISH_TIME="10000"
+    C:\>SomeDir>set SPARKPLUG_INDEX_MAX="50"
 ```
-- then run the jar as always:
+- run the jar:
 ```
     java -jar configuration-0.0.1-SNAPSHOT.jar
 ```
+
+- run the docker:
+```
+
+```
+
 
