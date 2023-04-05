@@ -22,9 +22,10 @@ import java.util.Map;
  * Created by nickAS21 on 10.01.23
  */
 public class SparkplugTopicUtil {
+
     private static final Map<String, String[]> SPLIT_TOPIC_CACHE = new HashMap<String, String[]>();
     private static final String TOPIC_INVALID_NUMBER = "Invalid number of topic elements: ";
-    public static final String NAMESPACE = "spBv1.0";
+    public static final String SPARKPLUG_CLIENT_NAME_SPACE = "spBv1.0";
 
     public static String[] getSplitTopic(String topic) {
         String[] splitTopic = SPLIT_TOPIC_CACHE.get(topic);
@@ -78,9 +79,8 @@ public class SparkplugTopicUtil {
      * @return
      */
     public static String validateNameSpace(String nameSpace)  throws AdaptorException {
-        if (NAMESPACE.equals(nameSpace)) return nameSpace;
-        throw new AdaptorException("The namespace [" + nameSpace + "] is not valid and must be [" + NAMESPACE + "] for the Sparkplug™ B version.");
+        if (SPARKPLUG_CLIENT_NAME_SPACE.equals(nameSpace)) return nameSpace;
+        throw new AdaptorException("The namespace [" + nameSpace + "] is not valid and must be [" + SPARKPLUG_CLIENT_NAME_SPACE + "] for the Sparkplug™ B version.");
     }
-
-
 }
+

@@ -15,7 +15,6 @@
  */
 package org.thinghsboard.sparkplug;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
@@ -23,12 +22,8 @@ import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,17 +36,14 @@ import org.thinghsboard.sparkplug.config.NodeDeviceMetric;
 import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
 import org.thinghsboard.sparkplug.util.AdaptorException;
-import org.thinghsboard.sparkplug.util.JacksonUtil;
 import org.thinghsboard.sparkplug.util.SparkplugTopic;
 
 import java.util.Map;
 
 import static org.thinghsboard.sparkplug.util.MetricDataType.Bytes;
 import static org.thinghsboard.sparkplug.util.MetricDataType.Int32;
-import static org.thinghsboard.sparkplug.util.SparkplugConstatns.CONFIG_JSON;
-import static org.thinghsboard.sparkplug.util.SparkplugConstatns.KEYS_BD_SEQ;
-import static org.thinghsboard.sparkplug.util.SparkplugConstatns.LIST_METRICS_JSON;
-import static org.thinghsboard.sparkplug.util.SparkplugConstatns.SPARK_CONFIG_PATH_KEY;
+import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.KEYS_BD_SEQ;
+import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.SPARKPLUG_CLIENT_NAME_SPACE;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DBIRTH;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.DDATA;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NBIRTH;
@@ -59,9 +51,9 @@ import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDATA;
 import static org.thinghsboard.sparkplug.util.SparkplugMessageType.NDEATH;
 import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.createMetric;
 import static org.thinghsboard.sparkplug.util.SparkplugMetricUtil.nextValueChange;
-import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.NAMESPACE;
 import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.parseTopicPublish;
-import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.validateNameSpace;
+import static org.thinghsboard.sparkplug.util.SparkplugUtil.getNodeDevices;
+import static org.thinghsboard.sparkplug.util.SparkplugUtil.getSparkplugNodeConfig;
 
 /**
  * An example Sparkplug B application.
@@ -74,13 +66,12 @@ import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.validateNameSpa
 public class SparkplugEmulation {
 
     // Configuration
-    //	private String serverUrl = "tcp://192.168.1.100:1883";
     private String serverUrl;
     private String namespace;
     protected String groupId;
     protected String edgeNode;
     private String clientId;
-    private String username;
+    private String edgeNodeToken;
     private ExecutorService executor;
     public MqttAsyncClient client;
 
@@ -98,57 +89,49 @@ public class SparkplugEmulation {
     private SparkplugMqttCallback mqttCallback;
 
     /**
-     * PARK_CONFIG_PATH='src/main/resources'
-     * java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar SPARK_CONFIG_PATH='src/main/resources'
+     * constant SPARKPLUG_CLIENT_NAME_SPACE="spBv1.0"
+     * Env:
+     * export SPARKPLUG_SERVER_URL=tcp://localhost:1883
+     * export SPARKPLUG_CLIENT_GROUP_ID="GroupIdSparkplug"
+     * export SPARKPLUG_CLIENT_NODE_ID="NodeSparkplugId"
+     * export SPARKPLUG_CLIENT_NODE_TOKEN="admin"
+     * export SPARKPLUG_CLIENT_IDS="DeviceSparkplugId1,DeviceSparkplugId2"
+     *
+     * export SPARKPLUG_CLIENT_USERNAME="" - Default empty
+     * export SPARKPLUG_CLIENT_PASSWORD="" - Default empty
+     *
+     * export SPARKPLUG_CLIENT_PUBLISH_TIMEOUT=10000
+     * export SPARKPLUG_CLIENT_INDES_MAX=50
+     *
+     * export SPARKPLUG_CONFIG_FILE="" // Default: SPARKPLUG_CONFIG_FILE: in resourses "Config.json"
+     * export SPARKPLUG_METRICS_FILE="" // Default: SPARKPLUG_METRICS_FILE: in resources "Metrics.json"
      *
      * @param args
      */
     public static void main(String[] args) throws MqttException {
         SparkplugEmulation demoEmulation = new SparkplugEmulation();
-        demoEmulation.init(args);
+        demoEmulation.init();
         demoEmulation.run();
     }
 
     /**
-     * @param args
      * @throws IOException
      */
-    public void init(String[] args) throws MqttException {
+    public void init() throws MqttException {
         try {
-            Map<String, String> env = System.getenv();
-            InputStream isConfig;
-            InputStream isListMetrics;
-            String appPath = System.getProperty("user.dir");
-            String pathConfigJson = env.get(SPARK_CONFIG_PATH_KEY);
-            if (pathConfigJson != null &&
-                    new File(pathConfigJson + File.separator + CONFIG_JSON).isFile() &&
-                    new File(pathConfigJson + File.separator + LIST_METRICS_JSON).isFile()) {
-//                System.out.println("Path from any: [" + pathConfigJson +"]");
-                isConfig = new FileInputStream(pathConfigJson + File.separator + CONFIG_JSON);
-                isListMetrics = new FileInputStream(pathConfigJson + File.separator + LIST_METRICS_JSON);
-            } else if (new File(appPath + File.separator + CONFIG_JSON).isFile() &&
-                    new File(appPath + File.separator + LIST_METRICS_JSON).isFile()) {
-//               System.out.println("Path from appPath: [" + appPath +"]");
-                isConfig = new FileInputStream(appPath + File.separator + CONFIG_JSON);
-                isListMetrics = new FileInputStream(appPath + File.separator + LIST_METRICS_JSON);
-            } else {
-//                System.out.println("Path resources");
-                isConfig = new ClassPathResource(CONFIG_JSON).getInputStream();
-                isListMetrics = new ClassPathResource(LIST_METRICS_JSON).getInputStream();
-            }
-            this.sparkplugNodeConfig = JacksonUtil.fromInputToObject(isConfig, SparkplugNodeConfig.class);
-            this.nodeDevices = JacksonUtil.fromInputToCollection(isListMetrics, new TypeReference<>() {
-            });
+            this.sparkplugNodeConfig = getSparkplugNodeConfig();
+            this.nodeDevices = getNodeDevices();
+
             Optional<NodeDevice> nodeOpt = this.nodeDevices.stream().filter(o -> (o.getNodeDeviceId().equals(this.sparkplugNodeConfig.getEdgeNode()))).findAny();
             if (nodeOpt.isPresent()) {
                 nodeOpt.get().setNode(true);
             }
             this.serverUrl = this.sparkplugNodeConfig.getServerUrl();
-            this.namespace = validateNameSpace(this.sparkplugNodeConfig.getNamespace());
+            this.namespace = SPARKPLUG_CLIENT_NAME_SPACE;
             this.groupId = this.sparkplugNodeConfig.getGroupId();
             this.edgeNode = this.sparkplugNodeConfig.getEdgeNode();
             this.clientId = edgeNode;
-            this.username = this.sparkplugNodeConfig.getEdgeNodeToken();
+            this.edgeNodeToken = this.sparkplugNodeConfig.getEdgeNodeToken();
             this.publishTimeout = this.sparkplugNodeConfig.getPublishTimeout();
             this.index = 0;
             this.bdSeq = 0;
@@ -180,7 +163,7 @@ public class SparkplugEmulation {
             this.mqttCallback = new SparkplugMqttCallback(this);
             this.client.setCallback(this.mqttCallback);
             MqttConnectionOptions options = new MqttConnectionOptions();
-            options.setUserName(this.username);
+            options.setUserName(this.edgeNodeToken);
             options.setAutomaticReconnect(true);
             options.setConnectionTimeout(30);
             options.setKeepAliveInterval(30);
@@ -194,10 +177,10 @@ public class SparkplugEmulation {
             if (client.isConnected()) {
                 publishBirth();
                 // Subscribe to control/command messages for both the edge of network node and the attached devices
-                client.subscribe(NAMESPACE + "/" + groupId + "/NCMD/" + edgeNode + "/#", 0);
+                client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/NCMD/" + edgeNode + "/#", 0);
                 for (NodeDevice device : this.nodeDevices) {
                     if (!device.isNode()) {
-                        client.subscribe(NAMESPACE + "/" + groupId + "/DCMD/" + edgeNode + "/" + device.getNodeDeviceId() + "/#", 0);
+                        client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/DCMD/" + edgeNode + "/" + device.getNodeDeviceId() + "/#", 0);
                     }
                 }
                 publishData();
@@ -253,9 +236,9 @@ public class SparkplugEmulation {
             creatBirthMetrics(payloadBirthNode, nodeDeviceId, ts);
             String topic;
             if (edgeNode.equals(nodeDeviceId)) {
-                topic = NAMESPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode;
+                topic = SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode;
             } else {
-                topic = NAMESPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
+                topic = SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
             }
             executor.execute(new Publisher(topic, payloadBirthNode.build()));
         } catch (Exception e) {
@@ -332,9 +315,9 @@ public class SparkplugEmulation {
                         this.index = 0;
                         for (NodeDevice device : this.nodeDevices) {
                             if (device.isNode()) {
-                                executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
+                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
                             } else {
-                                executor.execute(new Publisher(NAMESPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
+                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
                             }
                         }
 
@@ -378,8 +361,8 @@ public class SparkplugEmulation {
     }
 
     public SparkplugTopic validateTopic(SparkplugTopic sparkplugTopic) throws AdaptorException {
-        if (!NAMESPACE.equals(sparkplugTopic.getNamespace())) {
-            throw new AdaptorException("The namespace [" + sparkplugTopic.getNamespace() + "] is not valid and must be [" + NAMESPACE + "] for the Sparkplug™ B version.");
+        if (!SPARKPLUG_CLIENT_NAME_SPACE.equals(sparkplugTopic.getNamespace())) {
+            throw new AdaptorException("The namespace [" + sparkplugTopic.getNamespace() + "] is not valid and must be [" + SPARKPLUG_CLIENT_NAME_SPACE + "] for the Sparkplug™ B version.");
         }
         if (!this.groupId.equals(sparkplugTopic.getGroupId())) {
             throw new AdaptorException("The groupId [" + sparkplugTopic.getGroupId() + "] is not valid and must be [" + this.groupId + "].");

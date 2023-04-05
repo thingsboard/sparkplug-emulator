@@ -40,6 +40,7 @@ import static org.thinghsboard.sparkplug.util.MetricDataType.fromInteger;
 public class SparkplugMetricUtil {
 
     protected static ThreadLocalRandom random = ThreadLocalRandom.current();
+    public static final String KEYS_BD_SEQ = "bdSeq";
 
     public static SparkplugBProto.Payload.Metric createMetric(Object value, long ts, String key, MetricDataType metricDataType) throws AdaptorException {
         try {
