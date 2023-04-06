@@ -15,10 +15,14 @@
  */
 package org.thinghsboard.sparkplug;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.paho.mqttv5.client.IMqttToken;
+import org.eclipse.paho.mqttv5.client.MqttActionListener;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttClientException;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.MqttToken;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
@@ -36,6 +40,7 @@ import org.thinghsboard.sparkplug.config.NodeDeviceMetric;
 import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
 import org.thinghsboard.sparkplug.util.AdaptorException;
+import org.thinghsboard.sparkplug.util.ReturnCode;
 import org.thinghsboard.sparkplug.util.SparkplugTopic;
 
 import java.util.Map;
@@ -211,7 +216,6 @@ public class SparkplugEmulation {
                 long ts = System.currentTimeMillis();
                 if (nodeDeviceNames.length == 0) {
                     // Create the Node/Devices BIRTH payload with metrics
-                    SparkplugBProto.Payload.Builder payloadBirthDevice;
                     for (NodeDevice device : this.nodeDevices) {
                         sendBirthNodeDevice(device.getNodeDeviceId(), ts);
                     }
@@ -237,10 +241,12 @@ public class SparkplugEmulation {
             String topic;
             if (edgeNode.equals(nodeDeviceId)) {
                 topic = SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NBIRTH + "/" + edgeNode;
+                executor.execute(new Publisher(topic, payloadBirthNode.build(), 1));
             } else {
                 topic = SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DBIRTH + "/" + edgeNode + "/" + nodeDeviceId;
+                executor.execute(new Publisher(topic, payloadBirthNode.build(), 0));
             }
-            executor.execute(new Publisher(topic, payloadBirthNode.build()));
+
         } catch (Exception e) {
             throw new AdaptorException("Invalid device [" + nodeDeviceId + "] publishBirth, " + e.getMessage());
         }
@@ -315,9 +321,9 @@ public class SparkplugEmulation {
                         this.index = 0;
                         for (NodeDevice device : this.nodeDevices) {
                             if (device.isNode()) {
-                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build()));
+                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NDATA + "/" + edgeNode, payloadDatas.get(device).build(), 0));
                             } else {
-                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build()));
+                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DDATA + "/" + edgeNode + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build(), 0));
                             }
                         }
 
@@ -424,25 +430,52 @@ public class SparkplugEmulation {
         }
     }
 
-    private class Publisher implements Runnable {
+    private class Publisher implements Runnable  {
 
         private String topic;
         private SparkplugBProto.Payload outboundPayload;
+        int qos;
+        MqttActionListener mqttActionListener;
 
-        public Publisher(String topic, SparkplugBProto.Payload outboundPayload) {
+        public Publisher(String topic, SparkplugBProto.Payload outboundPayload, int qos) {
             this.topic = topic;
             this.outboundPayload = outboundPayload;
+            this.qos = qos;
+            if (qos > 0) {
+                mqttActionListener = new MqttActionListener() {
+                    private Object topicListener = topic;
+
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken) {
+                        if (asyncActionToken.getResponse() != null && asyncActionToken.getResponse().getReasonCodes().length > 0 && asyncActionToken.getResponse().getReasonCodes()[0] > 0) {
+                            log.error("Listener topic [{}] Response code: [{}]", topicListener, ReturnCode.valueOf((byte) asyncActionToken.getResponse().getReasonCodes()[0]).name());
+                            System.exit(0);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                        log.error("Listener topic [{}] Response: [{}] error: [{}]", topicListener, asyncActionToken.getResponse(), exception.getMessage());
+                    }
+                };
+            }
         }
 
+        @SneakyThrows
         public void run() {
+            String nodeDeiceName = "";
             try {
                 SparkplugTopic sparkplugTopic = parseTopicPublish(topic);
-                String nodeDeviceId = sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId();
+                nodeDeiceName = sparkplugTopic.isNode() ? sparkplugTopic.getEdgeNodeId() : sparkplugTopic.getDeviceId();
                 if (clientReconnect()) {
-                    client.publish(topic, outboundPayload.toByteArray(), 0, false);
-                    log.info("Publishing [{}] {}", nodeDeviceId, sparkplugTopic.getType().name());
+                    if (qos > 0) {
+                        client.publish(topic, outboundPayload.toByteArray(), qos, false, null, mqttActionListener);
+                    } else {
+                        client.publish(topic, outboundPayload.toByteArray(), qos, false);
+                    }
+                    log.info("Publishing [{}] {}", nodeDeiceName, sparkplugTopic.getType().name());
                 } else {
-                    log.error("Client is not connected. Publishing [{}] {} bad", nodeDeviceId, sparkplugTopic.getType().name());
+                    log.error("Client is not connected. Publishing [{}] {} bad", nodeDeiceName, sparkplugTopic.getType().name());
                 }
             } catch (MqttException | InterruptedException | AdaptorException mqttException) {
                 mqttException.printStackTrace();
@@ -450,4 +483,5 @@ public class SparkplugEmulation {
         }
     }
 }
+
 

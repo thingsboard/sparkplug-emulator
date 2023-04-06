@@ -1,7 +1,7 @@
 {
   "serverUrl": "tcp://localhost:1883",
   "groupId": "GroupIdSparkplug",
-  "edgeNode": "NodeSparkplug",
+  "edgeNode": "NodeSparkplugId",
   "edgeNodeToken": "admin",
   "publishTimeout": 10000,
   "indexMax": 50

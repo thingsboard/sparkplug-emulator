@@ -24,7 +24,7 @@ Run the jar as always:
 {
   "serverUrl": "tcp://localhost:1883",
   "groupId": "GroupIdSparkplug",
-  "edgeNode": "NodeSparkplug",
+  "edgeNode": "NodeSparkplugId",
   "edgeNodeToken": "admin",
   "publishTimeout": 10000,
   "indexMax": 50
@@ -37,10 +37,13 @@ Run the jar as always:
 -**"indexMax"** is the count of metric updates between a publish message sent from **Node** with SparkplugMessageType **NDATA/DDATA**.
 
 - device names and a list of metrics for each of the devices (`Metrics.json`)
+
+*Note:
+- the value of the first **"nodeDeviceId"** in `Metrics.json` must be equal to the value of **"edgeNode"** in `Config.json`. Otherwise the value of the first **"nodeDeviceId"** in `Metrics.json` will be used as **"DeviceId"**.
 ```json
 [
   {
-    "nodeDeviceId": "NodeSparkplug",
+    "nodeDeviceId": "NodeSparkplugId",
     "nodeDeviceListMetrics": [
       {
         "nameMetric": "Node Control/Reboot",
