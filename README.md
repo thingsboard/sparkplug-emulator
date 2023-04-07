@@ -213,6 +213,7 @@ Run the jar as always:
 ## Using environment variables with SparkplugEmulation
 
 ### Set Environment variable option
+#### From terminal OS
 - On linux, execute:
 ```
     export SPARKPLUG_CLIENT_CONFIG_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Config.json"
@@ -237,12 +238,17 @@ Run the jar as always:
 ```
 - run the jar:
 ```
-    java -jar configuration-0.0.1-SNAPSHOT.jar
+    java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+#### From terminal OS with Docker
+- to create a docker named <span style="color:blue">tb-sparkplug</span> run the following command in terminal from main dir`s project: <i>'./sparkplug$'</i>
+```shell
+./docker/create-tb-sparkplug-docker.sh
 ```
 
-- run the docker:
+- run the docker <span style="color:blue">tb-sparkplug</span> for to connect to server with API **192.168.1.100**: 
 ```
-
+docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' tb-sparkplug
 ```
 
 
