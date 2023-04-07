@@ -142,7 +142,7 @@ public class SparkplugEmulation {
             this.bdSeq = 0;
             this.seq = 0;
             this.seqLock = new Object();
-            log.warn("{}", this.sparkplugNodeConfig);
+            log.warn("Test docker: {}", this.sparkplugNodeConfig);
             log.warn("{}", this.nodeDevices);
         } catch (Exception e) {
             log.error("Invalidate init, " + e.getMessage());

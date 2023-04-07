@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #
 # Copyright © ${project.inceptionYear}-2023 The Thingsboard Authors
 #
@@ -15,5 +16,10 @@
 # limitations under the License.
 #
 
-cd ${main.dir}
-docker build -f ./docker/Dockerfile --tag tb-sparkplug .
+SCRIPT=$(readlink -f "$0")
+
+SCRIPTPATH=$(dirname "$SCRIPT")
+
+cd ${SCRIPTPATH}/target
+
+docker build -f ./Dockerfile --tag nickas21/tb-sparkplug-emulation:1.0-SNAPSHOT .

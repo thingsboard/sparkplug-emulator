@@ -28,6 +28,7 @@
 
     <properties>
         <main.dir>${basedir}</main.dir>
+        <docker.dir>${main.dir}/target</docker.dir>
         <pkg.user>thingsboard</pkg.user>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -41,6 +42,13 @@
         <jackson-databind.version>2.13.4.2</jackson-databind.version>
         <lombok.version>1.18.18</lombok.version>
         <slf4j.version>1.7.32</slf4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <pkg.name>tb-sparkplug</pkg.name>
+        <docker.name>tb-sparkplug-emulation</docker.name>
+        <docker.repo>nickas21</docker.repo>
+        <dockerfile.skip>true</dockerfile.skip>
+        <pkg.logFolder>/var/log/${pkg.name}</pkg.logFolder>
+        <pkg.installFolder>/usr/share/${pkg.name}</pkg.installFolder>
     </properties>
 
     <dependencies>
@@ -252,8 +260,105 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-docker-config</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>docker</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-docker-image</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${dockerfile.skip}</skip>
+                            <repository>${docker.repo}/${docker.name}</repository>
+                            <verbose>true</verbose>
+                            <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
+                            <contextDirectory>${project.build.directory}</contextDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tag-docker-image</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>tag</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${dockerfile.skip}</skip>
+                            <repository>${docker.repo}/${docker.name}</repository>
+                            <tag>${project.version}</tag>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+<!--    Docker-->
+    <profiles>
+        <profile>
+            <id>push-docker-image</id>
+            <activation>
+                <property>
+                    <name>push-docker-image</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>dockerfile-maven-plugin</artifactId>
+                        <executions>
+<!--                            <execution>-->
+<!--                                <id>push-latest-docker-image</id>-->
+<!--                                <phase>pre-integration-test</phase>-->
+<!--                                <goals>-->
+<!--                                    <goal>push</goal>-->
+<!--                                </goals>-->
+<!--                                <configuration>-->
+<!--                                    <tag>latest</tag>-->
+<!--                                    <repository>${docker.repo}/${docker.name}</repository>-->
+<!--                                </configuration>-->
+<!--                            </execution>-->
+                            <execution>
+                                <id>push-version-docker-image</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>push</goal>
+                                </goals>
+                                <configuration>
+                                    <tag>${project.version}</tag>
+                                    <repository>${docker.repo}/${docker.name}</repository>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
 
