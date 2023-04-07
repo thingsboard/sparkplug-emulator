@@ -236,19 +236,48 @@ Run the jar as always:
     C:\>SomeDir>set SPARKPLUG_PUBLISH_TIME="10000"
     C:\>SomeDir>set SPARKPLUG_INDEX_MAX="50"
 ```
-- run the jar:
+```
+## Start project
+### Start project from terminal OS with jar
 ```
     java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
-#### From terminal OS with Docker
+### Start project from terminal OS with Docker
+#### Copy Docker image and start (after git clone project)
+- copy Docker image <span style="color:blue">tb-sparkplug</span> from repository docker hub
+```shell
+docker pull nickas21/tb-sparkplug-emulation:tb-sparkplug
+```
+- run command from terminal: to check docker image with name <span style="color:blue">tb-sparkplug</span> installation from repository docker hub
+```shell
+$ docker images nickas21/tb-sparkplug-emulation
+REPOSITORY                        TAG            IMAGE ID       CREATED          SIZE
+nickas21/tb-sparkplug-emulation   tb-sparkplug   370e893e9e92   41 minutes ago   496MB
+```
+
+- run the docker image **nickas21/tb-sparkplug-emulation** with **TAG** <span style="color:blue">tb-sparkplug</span> for to connect to server with API <span style="color:green">**192.168.1.100**</span>: 
+```shell
+docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' nickas21/tb-sparkplug-emulation:tb-sparkplug
+```
+
+or
+
+- run the docker image **nickas21/tb-sparkplug-emulation** with **TAG** <span style="color:blue">tb-sparkplug</span> by I**MAGE ID** = ***370e893e9e92*** for to connect to server with API <span style="color:green">**192.168.1.100**</span>: 
+```shell
+docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' 370e893e9e92
+```
+
+#### Created Docker image and start (after git clone project)
+
 - to create a docker named <span style="color:blue">tb-sparkplug</span> run the following command in terminal from main dir`s project: <i>'./sparkplug$'</i>
 ```shell
 ./docker/create-tb-sparkplug-docker.sh
 ```
 
-- run the docker <span style="color:blue">tb-sparkplug</span> for to connect to server with API **192.168.1.100**: 
-```
+- run the docker <span style="color:blue">tb-sparkplug</span> for to connect to server with API <span style="color:green">**192.168.1.100**</span>: 
+```shell
 docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' tb-sparkplug
 ```
+
 
 
