@@ -236,11 +236,11 @@ Run the jar as always:
     C:\>SomeDir>set SPARKPLUG_PUBLISH_TIME="10000"
     C:\>SomeDir>set SPARKPLUG_INDEX_MAX="50"
 ```
-```
+
 ## Start project
 ### Start project from terminal OS with jar
-```
-    java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
+```shaell
+java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 ### Start project from terminal OS with Docker
 #### Copy Docker image and start (after git clone project)
