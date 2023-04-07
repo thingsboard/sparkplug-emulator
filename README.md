@@ -203,17 +203,15 @@ Run the jar as always:
   }
 ]
 ```
+## Start project
 
-## Without using SparkplugEmulation environment variables
+### Without using SparkplugEmulation environment variables
 - FilePath: <span style="color:green">/home/SparkplugB_Thingsboard/sparkplug</span> ;
 - File with configuration: <span style="color:brown">Config.json</span>;
 - File with device names and a list of metrics for each of the devices: <span style="color:brown">Metrics.json</span>;
 
 
-## Using environment variables with SparkplugEmulation
-
-### Set Environment variable option
-#### From terminal OS
+### Using environment variables with SparkplugEmulation and set Environment variable option from terminal OS
 - On linux, execute:
 ```
     export SPARKPLUG_CLIENT_CONFIG_FILE_PATH="/home/SparkplugB_Thingsboard/sparkplug/Config.json"
@@ -237,11 +235,6 @@ Run the jar as always:
     C:\>SomeDir>set SPARKPLUG_INDEX_MAX="50"
 ```
 
-## Start project
-### Start project from terminal OS with jar
-```shaell
-java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
-```
 ### Start project from terminal OS with Docker
 #### Copy Docker image and start (after git clone project)
 - copy Docker image <span style="color:blue">tb-sparkplug</span> from repository docker hub
@@ -279,5 +272,9 @@ docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' 370e893e9e92
 docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' tb-sparkplug
 ```
 
+### Start project from terminal OS with jar
+```shaell
+java -jar sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
 
 
