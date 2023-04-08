@@ -237,9 +237,9 @@ Run the jar as always:
 
 ### Start project from terminal OS with Docker
 #### Copy Docker image and start (without git clone project)
-- copy Docker image <span style="color:blue">nickas21/tb-sparkplug-emulation</span> TAG <span style="color:blue">1.0-SNAPSHOT</span> from repository docker hub
+- copy Docker image <span style="color:blue">nickas21/tb-sparkplug-emulation</span> TAG <span style="color:blue">latest</span> from repository docker hub
 ```shell
-docker pull nickas21/tb-sparkplug-emulation:1.0-SNAPSHOT
+docker pull nickas21/tb-sparkplug-emulation:latest
 ```
 
 #### Created Docker image and start (after git clone project)
@@ -254,12 +254,12 @@ docker pull nickas21/tb-sparkplug-emulation:1.0-SNAPSHOT
 ```shell
 $ docker images nickas21/tb-sparkplug-emulation
 REPOSITORY                        TAG            IMAGE ID       CREATED          SIZE
-nickas21/tb-sparkplug-emulation   1.0-SNAPSHOT   370e893e9e92   41 minutes ago   496MB
+nickas21/tb-sparkplug-emulation   latest   370e893e9e92   41 minutes ago   496MB
 ```
 
 - run the docker image **nickas21/tb-sparkplug-emulation** with **TAG** <span style="color:blue">tb-sparkplug</span> for to connect to server with API <span style="color:green">**192.168.1.100**</span>: 
 ```shell
-docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' nickas21/tb-sparkplug-emulation:1.0-SNAPSHOT
+docker run -e SPARKPLUG_SERVER_URL='tcp://192.168.1.100:1883' nickas21/tb-sparkplug-emulation:latest
 ```
 
 or

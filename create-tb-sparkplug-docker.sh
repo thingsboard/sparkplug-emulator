@@ -22,4 +22,4 @@ SCRIPTPATH=$(dirname "$SCRIPT")
 
 cd ${SCRIPTPATH}/target
 
-docker build -f ./Dockerfile --tag nickas21/tb-sparkplug-emulation:1.0-SNAPSHOT .
+docker build -f ./Dockerfile --tag nickas21/tb-sparkplug-emulation:latest .
