@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +42,7 @@ import org.thinghsboard.sparkplug.util.ReturnCode;
 import org.thinghsboard.sparkplug.util.SparkplugTopic;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -71,13 +73,11 @@ public class SparkplugEmulation {
 
     // Configuration
     private ExecutorService executor;
-    public MqttAsyncClient client;
+    private MqttAsyncClient client;
     private SparkplugNodeConfiguration configuration;
     private String groupId;
     private String nodeId;
     private List<NodeDevice> nodeDevices;
-
-    private int index;
 
     private int bdSeq;
     private int seq;
@@ -97,7 +97,6 @@ public class SparkplugEmulation {
             this.nodeId = configuration.getNodeId();
             Optional<NodeDevice> nodeOpt = this.nodeDevices.stream().filter(o -> (o.getNodeDeviceId().equals(this.configuration.getNodeId()))).findAny();
             nodeOpt.ifPresent(nodeDevice -> nodeDevice.setNode(true));
-            this.index = 0;
             this.bdSeq = 0;
             this.seq = 0;
             log.info("Emulator configuration: {}", this.configuration);
@@ -115,7 +114,7 @@ public class SparkplugEmulation {
         }
     }
 
-    public void run() throws MqttException {
+    public void run() {
         try {
             // Random generator and thread pool for outgoing published messages
             executor = Executors.newFixedThreadPool(1);
@@ -133,27 +132,37 @@ public class SparkplugEmulation {
             msg.setId(0);
             msg.setPayload(deathBytes);
             options.setWill(topic, msg);
-            client.connect(options);
-            clientReconnect(configuration.getPublishInterval());
-            if (client.isConnected()) {
-                publishBirth();
-                // Subscribe to control/command messages for both the edge of network node and the attached devices
-                client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/NCMD/" + nodeId + "/#", 0);
-                for (NodeDevice device : this.nodeDevices) {
-                    if (!device.isNode()) {
-                        client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/DCMD/" + nodeId + "/" + device.getNodeDeviceId() + "/#", 0);
-                    }
+            CountDownLatch connectionLatch = new CountDownLatch(1);
+            client.connect(options, null, new MqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    connectionLatch.countDown();
                 }
-                publishData();
-            } else {
-                clientFinishWithError();
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    log.error("Connect failed due to: {}", exception.getMessage());
+                    log.error("\nCheck:\n" +
+                            "- parameters in \"Config.json\"\n" +
+                            "- is the server running at the address [{}]\n" +
+                            "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", configuration.getServerUrl());
+                    clientClose();
+                    System.exit(0);
+                }
+            });
+            connectionLatch.await(options.getConnectionTimeout() + 1, TimeUnit.SECONDS);
+            publishBirth();
+            // Subscribe to control/command messages for both the edge of network node and the attached devices
+            client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/NCMD/" + nodeId + "/#", 0);
+            for (NodeDevice device : this.nodeDevices) {
+                if (!device.isNode()) {
+                    client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/DCMD/" + nodeId + "/" + device.getNodeDeviceId() + "/#", 0);
+                }
             }
+            publishData();
         } catch (Exception e) {
-            log.error("Invalid run, " + e.getMessage());
-            if (this.client.isConnected()) {
-                this.client.disconnect();
-            }
-            this.client.close();
+            log.error("Error occurred: {}", e.getMessage());
+            clientClose();
             System.exit(0);
         }
     }
@@ -228,7 +237,7 @@ public class SparkplugEmulation {
         }
     }
 
-    private void createChangeMetrics(SparkplugBProto.Payload.Builder payload, String nodeDeiceName, long ts) throws AdaptorException {
+    private void createOrChangeMetrics(SparkplugBProto.Payload.Builder payload, String nodeDeiceName, long ts) throws AdaptorException {
         try {
             List<NodeDeviceMetric> nodeListMetrics = this.nodeDevices.stream().filter(
                     nodeDevice -> nodeDevice.getNodeDeviceId().equals(nodeDeiceName)).findAny().get().getNodeDeviceListMetrics();
@@ -276,35 +285,14 @@ public class SparkplugEmulation {
                     ts = System.currentTimeMillis();
                     for (NodeDevice device : this.nodeDevices) {
                         // node/devices
-                        createChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
+                        createOrChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
                     }
-                    if (this.index >= this.configuration.getIndexMax()) {
-                        this.index = 0;
-                        for (NodeDevice device : this.nodeDevices) {
-                            if (device.isNode()) {
-                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NDATA + "/" + nodeId, payloadDatas.get(device).build(), 0));
-                            } else {
-                                executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DDATA + "/" + nodeId + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build(), 0));
-                            }
+                    for (NodeDevice device : this.nodeDevices) {
+                        if (device.isNode()) {
+                            executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + NDATA + "/" + nodeId, payloadDatas.get(device).build(), 0));
+                        } else {
+                            executor.execute(new Publisher(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/" + DDATA + "/" + nodeId + "/" + device.getNodeDeviceId(), payloadDatas.get(device).build(), 0));
                         }
-
-                        payloadDatas = new ConcurrentHashMap<>();
-                        for (NodeDevice device : this.nodeDevices) {
-                            SparkplugBProto.Payload.Builder payloadData;
-                            if (device.isNode()) {
-                                payloadData = SparkplugBProto.Payload.newBuilder()
-                                        .setTimestamp(System.currentTimeMillis())
-                                        .setSeq(getBdSeqNum());
-                            } else {
-                                payloadData = SparkplugBProto.Payload.newBuilder()
-                                        .setTimestamp(System.currentTimeMillis())
-                                        .setSeq(getSeqNum());
-                            }
-                            payloadDatas.put(device, payloadData);
-                        }
-                    } else {
-                        this.index++;
-                        log.info("Publishing index [{}] of Data", index);
                     }
                 } finally {
                     seqLock.unlock();
@@ -367,17 +355,8 @@ public class SparkplugEmulation {
         return client.isConnected();
     }
 
-    private void clientFinishWithError() {
-        log.error("Connect failed.... ");
-        log.error("\nCheck:\n" +
-                "- parameters in \"Config.json\"\n" +
-                "- is the server running at the address [{}]\n" +
-                "- whether the client is created as indicated in the documentation [https://thingsboard.io/docs/reference/mqtt-sparkplug-api/]", this.configuration.getServerUrl());
-        clientClose();
-    }
-
     public void clientClose() {
-        if (this.client.isConnected()) {
+        if (this.client != null && this.client.isConnected()) {
             try {
                 this.client.disconnect();
                 this.client.close();
