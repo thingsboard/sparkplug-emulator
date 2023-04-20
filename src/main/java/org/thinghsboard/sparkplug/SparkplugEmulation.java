@@ -95,8 +95,6 @@ public class SparkplugEmulation {
             this.nodeDevices = getNodeDevices();
             this.groupId = configuration.getGroupId();
             this.nodeId = configuration.getNodeId();
-            Optional<NodeDevice> nodeOpt = this.nodeDevices.stream().filter(o -> (o.getNodeDeviceId().equals(this.configuration.getNodeId()))).findAny();
-            nodeOpt.ifPresent(nodeDevice -> nodeDevice.setNode(true));
             this.bdSeq = 0;
             this.seq = 0;
             log.info("Emulator configuration: {}", this.configuration);
