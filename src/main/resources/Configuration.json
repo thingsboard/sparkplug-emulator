@@ -1,0 +1,8 @@
+{
+  "serverUrl": "tcp://localhost:1883",
+  "groupId": "Sparkplug Group 1",
+  "nodeId": "Sparkplug Node 1",
+  "username": "specify TB device access token here",
+  "publishInterval": 10000,
+  "indexMax": 50
+}

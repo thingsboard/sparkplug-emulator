@@ -237,7 +237,7 @@ Run the jar as always:
 
 ### Start project from terminal OS with Docker
 #### Copy Docker image and start (without git clone project)
-- copy Docker image <span style="color:blue">nickas21/tb-sparkplug-emulation</span> TAG <span style="color:blue">latest</span> from repository docker hub
+- copy Docker image <span style="color:blue">thingsboard/tb-sparkplug-emulator</span> TAG <span style="color:blue">latest</span> from repository docker hub
 ```shell
 docker pull nickas21/tb-sparkplug-emulation:latest
 ```

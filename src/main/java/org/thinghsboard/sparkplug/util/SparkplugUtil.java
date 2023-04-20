@@ -18,7 +18,7 @@ package org.thinghsboard.sparkplug.util;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.thinghsboard.sparkplug.config.NodeDevice;
-import org.thinghsboard.sparkplug.config.SparkplugNodeConfig;
+import org.thinghsboard.sparkplug.config.SparkplugNodeConfiguration;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,15 +34,17 @@ public class SparkplugUtil {
     private static final String SPARKPLUG_SERVER_URL_KEY = "SPARKPLUG_SERVER_URL";
     private static final String SPARKPLUG_CLIENT_GROUP_ID_KEY = "SPARKPLUG_CLIENT_GROUP_ID";
     private static final String SPARKPLUG_CLIENT_NODE_ID_KEY = "SPARKPLUG_CLIENT_NODE_ID";
-    private static final String SPARKPLUG_CLIENT_NODE_TOKEN_KEY = "SPARKPLUG_CLIENT_NODE_TOKEN";
-    private static final String SPARKPLUG_PUBLISH_TIME_KEY = "SPARKPLUG_PUBLISH_TIME";
+    private static final String SPARKPLUG_CLIENT_MQTT_CLIENT_ID_KEY = "SPARKPLUG_CLIENT_MQTT_CLIENT_ID";
+    private static final String SPARKPLUG_CLIENT_MQTT_USERNAME_KEY = "SPARKPLUG_CLIENT_MQTT_USERNAME";
+    private static final String SPARKPLUG_CLIENT_MQTT_PASSWORD_KEY = "SPARKPLUG_CLIENT_MQTT_PASSWORD";
+    private static final String SPARKPLUG_PUBLISH_INTERVAL_KEY = "SPARKPLUG_PUBLISH_INTERVAL";
     private static final String SPARKPLUG_INDEX_MAX_KEY = "SPARKPLUG_INDEX_MAX";
-    private static final String CONFIG_JSON = "Config.json";
+    private static final String CONFIG_JSON = "Configuration.json";
     private static final String METRICS_JSON = "Metrics.json";
     private static Map<String, String> env = System.getenv();
-    private static SparkplugNodeConfig sparkplugNodeConfig;
+    private static SparkplugNodeConfiguration sparkplugNodeConfiguration;
 
-    public static SparkplugNodeConfig getSparkplugNodeConfig() throws IOException {
+    public static SparkplugNodeConfiguration getSparkplugNodeConfig() throws IOException {
         InputStream isConfig;
         String fileConfigJson = env.get(SPARKPLUG_CLIENT_CONFIG_FILE_PATH_KEY);
         if (fileConfigJson != null && new File(fileConfigJson).isFile()) {
@@ -50,9 +52,9 @@ public class SparkplugUtil {
         } else {
             isConfig = new ClassPathResource(CONFIG_JSON).getInputStream();
         }
-        sparkplugNodeConfig = JacksonUtil.fromInputToObject(isConfig, SparkplugNodeConfig.class);
+        sparkplugNodeConfiguration = JacksonUtil.fromInputToObject(isConfig, SparkplugNodeConfiguration.class);
         updateSparkplugNodeConfig();
-        return sparkplugNodeConfig;
+        return sparkplugNodeConfiguration;
     }
 
     public static List<NodeDevice> getNodeDevices() throws IOException {
@@ -75,22 +77,28 @@ public class SparkplugUtil {
     private static void updateSparkplugNodeConfig() {
         //	private String serverUrl = "tcp://192.168.1.100:1883";
         if (env.get(SPARKPLUG_SERVER_URL_KEY) != null) {
-            sparkplugNodeConfig.setServerUrl(env.get(SPARKPLUG_SERVER_URL_KEY));
+            sparkplugNodeConfiguration.setServerUrl(env.get(SPARKPLUG_SERVER_URL_KEY));
         }
         if (env.get(SPARKPLUG_CLIENT_GROUP_ID_KEY) != null) {
-            sparkplugNodeConfig.setGroupId(env.get(SPARKPLUG_CLIENT_GROUP_ID_KEY));
+            sparkplugNodeConfiguration.setGroupId(env.get(SPARKPLUG_CLIENT_GROUP_ID_KEY));
         }
         if (env.get(SPARKPLUG_CLIENT_NODE_ID_KEY) != null) {
-            sparkplugNodeConfig.setEdgeNode(env.get(SPARKPLUG_CLIENT_NODE_ID_KEY));
+            sparkplugNodeConfiguration.setNodeId(env.get(SPARKPLUG_CLIENT_NODE_ID_KEY));
         }
-        if (env.get(SPARKPLUG_CLIENT_NODE_TOKEN_KEY) != null) {
-            sparkplugNodeConfig.setEdgeNodeToken(env.get(SPARKPLUG_CLIENT_NODE_TOKEN_KEY));
+        if (env.get(SPARKPLUG_CLIENT_MQTT_CLIENT_ID_KEY) != null) {
+            sparkplugNodeConfiguration.setClientId(env.get(SPARKPLUG_CLIENT_MQTT_CLIENT_ID_KEY));
         }
-        if (env.get(SPARKPLUG_PUBLISH_TIME_KEY) != null) {
-            sparkplugNodeConfig.setPublishTimeout(Integer.parseInt(env.get(SPARKPLUG_PUBLISH_TIME_KEY)));
+        if (env.get(SPARKPLUG_CLIENT_MQTT_USERNAME_KEY) != null) {
+            sparkplugNodeConfiguration.setUsername(env.get(SPARKPLUG_CLIENT_MQTT_USERNAME_KEY));
+        }
+        if (env.get(SPARKPLUG_CLIENT_MQTT_PASSWORD_KEY) != null) {
+            sparkplugNodeConfiguration.setPassword(env.get(SPARKPLUG_CLIENT_MQTT_PASSWORD_KEY));
+        }
+        if (env.get(SPARKPLUG_PUBLISH_INTERVAL_KEY) != null) {
+            sparkplugNodeConfiguration.setPublishInterval(Integer.parseInt(env.get(SPARKPLUG_PUBLISH_INTERVAL_KEY)));
         }
         if (env.get(SPARKPLUG_INDEX_MAX_KEY) != null) {
-            sparkplugNodeConfig.setIndexMax(Integer.parseInt(env.get(SPARKPLUG_INDEX_MAX_KEY)));
+            sparkplugNodeConfiguration.setIndexMax(Integer.parseInt(env.get(SPARKPLUG_INDEX_MAX_KEY)));
         }
     }
 }
