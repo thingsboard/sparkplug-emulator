@@ -23,13 +23,13 @@
       {
         "nameMetric": "Node Control/Scan Rate",
         "dataType": "Int64",
-        "value": 92233720368547758,
+        "value": 60000,
         "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
         "dataType": "String",
-        "value": "Properties Hardware Make: install",
+        "value": "Device Type 1",
         "autoChange": false
       },
       {
@@ -70,13 +70,13 @@
       {
         "nameMetric": "Device Control/Scan Rate",
         "dataType": "Int64",
-        "value": 922337203685477580,
+        "value": 60000,
         "autoChange": false
       },
       {
         "nameMetric": "Properties/Hardware Make",
         "dataType": "String",
-        "value": "Thinsboard Sparkplug™ B version: 3.5",
+        "value": "Device Type 1",
         "autoChange": false
       },
       {
@@ -123,25 +123,25 @@
       {
         "nameMetric": "MyNodeMetric01_Int32",
         "dataType": "Int32",
-        "value": 2147483647,
+        "value": 1000,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric02_LongInt64",
         "dataType": "Int64",
-        "value": 9223372036854775,
+        "value": 100000,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric03_Double",
         "dataType": "Double",
-        "value": 9223372036854775807,
+        "value": 45.5,
         "autoChange": true
       },
       {
         "nameMetric": "MyNodeMetric04_Float",
         "dataType": "Float",
-        "value": 32.432,
+        "value": 32.4,
         "autoChange": true
       },
       {

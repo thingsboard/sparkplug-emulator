@@ -150,16 +150,17 @@ public class SparkplugEmulation {
                     System.exit(0);
                 }
             });
-            connectionLatch.await(options.getConnectionTimeout() + 1, TimeUnit.SECONDS);
-            publishBirth();
-            // Subscribe to control/command messages for both the edge of network node and the attached devices
-            client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/NCMD/" + nodeId + "/#", 0);
-            for (NodeDevice device : this.nodeDevices) {
-                if (!device.isNode()) {
-                    client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/DCMD/" + nodeId + "/" + device.getNodeDeviceId() + "/#", 0);
+            if (connectionLatch.await(options.getConnectionTimeout() + 1, TimeUnit.SECONDS)) {
+                publishBirth();
+                // Subscribe to control/command messages for both the edge of network node and the attached devices
+                client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/NCMD/" + nodeId + "/#", 0);
+                for (NodeDevice device : this.nodeDevices) {
+                    if (!device.isNode()) {
+                        client.subscribe(SPARKPLUG_CLIENT_NAME_SPACE + "/" + groupId + "/DCMD/" + nodeId + "/" + device.getNodeDeviceId() + "/#", 0);
+                    }
                 }
+                publishData();
             }
-            publishData();
         } catch (Exception e) {
             log.error("Error occurred: {}", e.getMessage());
             clientClose();
