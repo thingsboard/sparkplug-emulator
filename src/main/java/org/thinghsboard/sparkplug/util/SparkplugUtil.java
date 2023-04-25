@@ -17,6 +17,7 @@ package org.thinghsboard.sparkplug.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StringUtils;
 import org.thinghsboard.sparkplug.config.NodeDevice;
 import org.thinghsboard.sparkplug.config.SparkplugNodeConfiguration;
 
@@ -38,7 +39,6 @@ public class SparkplugUtil {
     private static final String SPARKPLUG_CLIENT_MQTT_USERNAME_KEY = "SPARKPLUG_CLIENT_MQTT_USERNAME";
     private static final String SPARKPLUG_CLIENT_MQTT_PASSWORD_KEY = "SPARKPLUG_CLIENT_MQTT_PASSWORD";
     private static final String SPARKPLUG_PUBLISH_INTERVAL_KEY = "SPARKPLUG_PUBLISH_INTERVAL";
-    private static final String SPARKPLUG_INDEX_MAX_KEY = "SPARKPLUG_INDEX_MAX";
     private static final String CONFIG_JSON = "Configuration.json";
     private static final String METRICS_JSON = "Metrics.json";
     private static Map<String, String> env = System.getenv();
@@ -53,6 +53,9 @@ public class SparkplugUtil {
             isConfig = new ClassPathResource(CONFIG_JSON).getInputStream();
         }
         sparkplugNodeConfiguration = JacksonUtil.fromInputToObject(isConfig, SparkplugNodeConfiguration.class);
+        if (!StringUtils.hasText(sparkplugNodeConfiguration.getClientId())) {
+            sparkplugNodeConfiguration.setClientId(sparkplugNodeConfiguration.getNodeId());
+        }
         updateSparkplugNodeConfig();
         return sparkplugNodeConfiguration;
     }
@@ -96,9 +99,6 @@ public class SparkplugUtil {
         }
         if (env.get(SPARKPLUG_PUBLISH_INTERVAL_KEY) != null) {
             sparkplugNodeConfiguration.setPublishInterval(Integer.parseInt(env.get(SPARKPLUG_PUBLISH_INTERVAL_KEY)));
-        }
-        if (env.get(SPARKPLUG_INDEX_MAX_KEY) != null) {
-            sparkplugNodeConfiguration.setIndexMax(Integer.parseInt(env.get(SPARKPLUG_INDEX_MAX_KEY)));
         }
     }
 }

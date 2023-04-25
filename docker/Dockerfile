@@ -16,6 +16,6 @@
 
 FROM thingsboard/openjdk11:bullseye-slim
 
-COPY ./sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar /
+COPY ./sparkplug-1.0-jar-with-dependencies.jar /
 
-CMD ["java", "-jar", "/sparkplug-1.0-SNAPSHOT-jar-with-dependencies.jar"]
+CMD ["java", "-jar", "/sparkplug-1.0-jar-with-dependencies.jar"]

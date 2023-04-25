@@ -100,6 +100,9 @@ public class SparkplugEmulation {
             log.info("Emulator configuration: {}", this.configuration);
             log.info("Emulator devices:");
             for (NodeDevice device : this.nodeDevices) {
+                if(device.isNode()){
+                    device.setNodeDeviceId(configuration.getNodeId());
+                }
                 log.info("{}: {}", device.getNodeDeviceId(), device.getNodeDeviceListMetrics());
             }
         } catch (Exception e) {

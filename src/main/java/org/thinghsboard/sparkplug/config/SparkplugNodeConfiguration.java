@@ -35,7 +35,6 @@ public class SparkplugNodeConfiguration {
     private String password;
 
     private long publishInterval;
-    private int indexMax;
 
     public MqttConnectionOptions toMqttConnectOptions() {
         var options = new MqttConnectionOptions();
