@@ -287,6 +287,7 @@ public class SparkplugEmulation {
                     ts = System.currentTimeMillis();
                     for (NodeDevice device : this.nodeDevices) {
                         // node/devices
+                        payloadDatas.put(device, payloadDatas.get(device).clearMetrics());
                         createOrChangeMetrics(payloadDatas.get(device), device.getNodeDeviceId(), ts);
                     }
                     for (NodeDevice device : this.nodeDevices) {
