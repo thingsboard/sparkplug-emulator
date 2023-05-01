@@ -15,7 +15,7 @@ See all available environment variables below:
  * <code>SPARKPLUG_CLIENT_NODE_ID</code> - Sparkplug Node ID. Default value is <code>Sparkplug Node 1</code>;   
  * <code>SPARKPLUG_CLIENT_MQTT_CLIENT_ID</code> - Sparkplug MQTT Client ID. Default value is <code>Sparkplug Node 1</code>;   
  * <code>SPARKPLUG_CLIENT_MQTT_USERNAME</code> - Sparkplug MQTT Client username. See [authentication options](https://thingsboard.io/docs/user-guide/device-credentials/);    
- * <code>SPARKPLUG_CLIENT_MQTT_USERNAME</code> - Sparkplug MQTT Client password. See [MQTT basic credentials](https://thingsboard.io/docs/user-guide/basic-mqtt/);
+ * <code>SPARKPLUG_CLIENT_MQTT_PASSWORD</code> - Sparkplug MQTT Client password. See [MQTT basic credentials](https://thingsboard.io/docs/user-guide/basic-mqtt/);
  * <code>SPARKPLUG_PUBLISH_INTERVAL</code> - Interval for publishing of the metrics, in milliseconds. Default value is <code>10000</code>;   
  * <code>SPARKPLUG_CLIENT_CONFIG_FILE_PATH</code> - alternative path for the configuration file. No default value. Ignored if no value set;
  * <code>SPARKPLUG_CLIENT_METRICS_FILE_PATH</code> - alternative path for the metrics descriptor file. No default value. Ignored if no value set;   
