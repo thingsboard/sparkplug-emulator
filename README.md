@@ -1,6 +1,6 @@
 # Simple Sparkplug EoN node emulator 
 
-This emulator was designed for demonstration purposes to connect sample clients to [Thingsboard](https://thingsboard.io) via [MQTT Sparkplug API](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/)
+This emulator was designed for demonstration purposes to connect sample clients to [Thingsboard](https://thingsboard.io) via [MQTT Sparkplug API](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/).
 
 ## Running the emulator as docker container
 
