@@ -23,7 +23,7 @@
 
     <groupId>org.thinghsboard</groupId>
     <artifactId>sparkplug</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.17-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -123,7 +123,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <release>11</release>
+                        <release>17</release>
                         <compilerArgs>
                             <arg>-Xlint:deprecation</arg>
                             <arg>-Xlint:removal</arg>

@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-FROM thingsboard/openjdk11:bullseye-slim
+FROM thingsboard/openjdk17:bookworm-slim
 
-COPY ./sparkplug-1.0-jar-with-dependencies.jar /
+COPY ./sparkplug-1.17-SNAPSHOT-jar-with-dependencies.jar /
 
-CMD ["java", "-jar", "/sparkplug-1.0-jar-with-dependencies.jar"]
+CMD ["java", "-jar", "/sparkplug-1.17-SNAPSHOT-jar-with-dependencies.jar"]
