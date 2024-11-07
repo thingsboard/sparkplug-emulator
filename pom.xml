@@ -23,7 +23,7 @@
 
     <groupId>org.thinghsboard</groupId>
     <artifactId>sparkplug</artifactId>
-    <version>1.17-SNAPSHOT</version>
+    <version>1.17</version>
     <packaging>jar</packaging>
 
     <properties>
