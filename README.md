@@ -38,7 +38,7 @@ mvn clean install
 ### Running as plain java application
 
 ```shell
-java -jar sparkplug-1.17-SNAPSHOT-jar-with-dependencies.jar
+java -jar sparkplug-1.17-jar-with-dependencies.jar
 ```
 
 
