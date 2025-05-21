@@ -16,6 +16,6 @@
 
 FROM thingsboard/openjdk17:bookworm-slim
 
-COPY ./sparkplug-1.17-jar-with-dependencies.jar /
+COPY ./sparkplug-1.3.0-jar-with-dependencies.jar /
 
-CMD ["java", "-jar", "/sparkplug-1.17-jar-with-dependencies.jar"]
+CMD ["java", "-jar", "/sparkplug-1.3.0-jar-with-dependencies.jar"]
