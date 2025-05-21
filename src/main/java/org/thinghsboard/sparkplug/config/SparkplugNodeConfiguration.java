@@ -47,6 +47,9 @@ public class SparkplugNodeConfiguration {
         options.setAutomaticReconnect(true);
         options.setConnectionTimeout(30);
         options.setKeepAliveInterval(30);
+        if (options.getMqttVersion() == 5) {
+            options.setSessionExpiryInterval(0L);
+        }
         return options;
     }
 }

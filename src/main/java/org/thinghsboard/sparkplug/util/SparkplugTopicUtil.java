@@ -25,6 +25,15 @@ public class SparkplugTopicUtil {
 
     private static final Map<String, String[]> SPLIT_TOPIC_CACHE = new HashMap<String, String[]>();
     private static final String TOPIC_INVALID_NUMBER = "Invalid number of topic elements: ";
+    /**
+     * https://www.eclipse.org/tahu/spec/sparkplug_spec.pdf
+     * [tck-id-topic-structure-namespace-a] For the Sparkplug B version of the payload definition, the
+     * UTF-8 string constant for the namespace element MUST be:
+     * spBv1.0
+     * https://forum.cirrus-link.com/t/sparkplug-b-namespace-when-above-version-1-0/310/3
+     * The current topic token for use with Sparkplug v3.0.0 (per the spec) is still spBv1.0.
+     * Nothing fundamentally changed between v2.2 and v3.0.0 that required a change in this token.
+     */
     public static final String SPARKPLUG_CLIENT_NAME_SPACE = "spBv1.0";
 
     public static String[] getSplitTopic(String topic) {
