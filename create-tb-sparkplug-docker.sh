@@ -16,9 +16,16 @@
 #
 
 SCRIPT=$(readlink -f "$0")
-
 SCRIPTPATH=$(dirname "$SCRIPT")
 
-cd ${SCRIPTPATH}/target
+cd "${SCRIPTPATH}/target" || exit 1
 
-docker buildx build  -f ./Dockerfile --tag nickas21/tb-sparkplug-emulation:latest .
+docker buildx build -f ./Dockerfile --tag nickas21/tb-sparkplug-emulation:latest .
+
+read -r -p "Push image to Docker Hub? [Y/n]: " PUSH_CHOICE
+
+if [[ "$PUSH_CHOICE" =~ ^[Yy]$ || -z "$PUSH_CHOICE" ]]; then
+    docker push nickas21/tb-sparkplug-emulation:latest
+else
+    echo "Skipping push."
+fi
