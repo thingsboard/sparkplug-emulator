@@ -1,44 +1,130 @@
-# Simple Sparkplug EoN node emulator 
 
-This emulator was designed for demonstration purposes to connect sample clients to [Thingsboard](https://thingsboard.io) via [MQTT Sparkplug API](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/).
+# Simple Sparkplug EoN Node Emulator
 
-## Running the emulator as docker container
+This emulator is designed for demonstration purposes to connect sample clients to [Thingsboard](https://thingsboard.io) via the [MQTT Sparkplug API](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/).
+
+---
+
+## 🐳 Running he Emulator as a Docker Container
+
 
 ```bash
-docker run -e SPARKPLUG_SERVER_URL='tcp://thingsboard.cloud:1883' -e SPARKPLUG_CLIENT_MQTT_USERNAME='YOUR_THINGSBOARD_DEVICE_TOKEN' thingsboard/tb-sparkplug-emulator:latest
+docker run -e SPARKPLUG_SERVER_URL='tcp://thingsboard.cloud:1883' \
+  -e SPARKPLUG_CLIENT_MQTT_USERNAME='YOUR_THINGSBOARD_DEVICE_TOKEN' \
+  thingsboard/tb-sparkplug-emulator:latest
 ```
 
-See all available environment variables below:
+> **Note:** Do not use `localhost` inside a Docker container — it refers to the container itself. Use your actual IP address (e.g., `192.168.x.x`) or `host.docker.internal` (on macOS/Windows). On Linux, consider using `--network host`.
 
- * <code>SPARKPLUG_SERVER_URL</code> - MQTT broker URL. Default value is <code>tcp://demo.thingsboard.io:1883</code>;
- * <code>SPARKPLUG_CLIENT_GROUP_ID</code> - Sparkplug Group ID. Default value is <code>Sparkplug Group 1</code>;   
- * <code>SPARKPLUG_CLIENT_NODE_ID</code> - Sparkplug Node ID. Default value is <code>Sparkplug Node 1</code>;   
- * <code>SPARKPLUG_CLIENT_MQTT_CLIENT_ID</code> - Sparkplug MQTT Client ID. Default value is <code>Sparkplug Node 1</code>;   
- * <code>SPARKPLUG_CLIENT_MQTT_USERNAME</code> - Sparkplug MQTT Client username. See [authentication options](https://thingsboard.io/docs/user-guide/device-credentials/);    
- * <code>SPARKPLUG_CLIENT_MQTT_PASSWORD</code> - Sparkplug MQTT Client password. See [MQTT basic credentials](https://thingsboard.io/docs/user-guide/basic-mqtt/);
- * <code>SPARKPLUG_PUBLISH_INTERVAL</code> - Interval for publishing of the metrics, in milliseconds. Default value is <code>10000</code>;   
- * <code>SPARKPLUG_CLIENT_CONFIG_FILE_PATH</code> - alternative path for the configuration file. No default value. Ignored if no value set;
- * <code>SPARKPLUG_CLIENT_METRICS_FILE_PATH</code> - alternative path for the metrics descriptor file. No default value. Ignored if no value set;   
+- localhost -> Address = 192.168.28.74; Port = 1883, YOUR_THINGSBOARD_DEVICE_TOKEN = n03suscyeul0o1dn6b09.
 
-You can find more information about this **SparkplugEmulation application** with **Thingsboard** [here](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/)
+```bash
+docker run -e SPARKPLUG_SERVER_URL='tcp://t192.168.28.74:1883' \
+  -e SPARKPLUG_CLIENT_MQTT_USERNAME='n03suscyeul0o1dn6b09' \
+  thingsboard/tb-sparkplug-emulator:latest
+```
 
-### Metrics
+---
 
-Default Sparkplug metrics descriptor is located [here](https://github.com/thingsboard/sparkplug-emulator/blob/main/src/main/resources/Metrics.json).
-You may notice simple JSON structure that describes device id and a list of metrics. 
-Special <code>node</code> flag in the first JSON object defines metrics for the EoN Node itself.  
-You may supply your own metrics file using environment variable <code>SPARKPLUG_CLIENT_METRICS_FILE_PATH</code>
+## Available Environment Variables
 
-### Building from sources
+| Variable                             | Description                                                   | Default Value                    |
+|:-------------------------------------|:--------------------------------------------------------------|:---------------------------------|
+| `SPARKPLUG_SERVER_URL`               | MQTT broker URL                                               | `tcp://demo.thingsboard.io:1883` |
+| `SPARKPLUG_CLIENT_GROUP_ID`          | Sparkplug Group ID                                            | `Sparkplug Group 1`              |
+| `SPARKPLUG_CLIENT_NODE_ID`           | Sparkplug Node ID                                             | `Sparkplug Node 1`               |
+| `SPARKPLUG_CLIENT_MQTT_CLIENT_ID`    | Sparkplug MQTT Client ID                                      | `Sparkplug Node 1`               |
+| `SPARKPLUG_CLIENT_MQTT_USERNAME`     | MQTT client username (for authentication)                     | —                                |
+| `SPARKPLUG_CLIENT_MQTT_PASSWORD`     | MQTT client password                                          | —                                |
+| `SPARKPLUG_PUBLISH_INTERVAL`         | Interval for publishing metrics in milliseconds               | `10000`                          |
+| `SPARKPLUG_CLIENT_CONFIG_FILE_PATH`  | Alternative path for configuration file                       | —                                |
+| `SPARKPLUG_CLIENT_METRICS_FILE_PATH` | Alternative path for metrics descriptor file                  | —                                |
 
-```shell
+---
+
+## Metrics
+
+The default Sparkplug metrics descriptor is located here:
+
+[Metrics.json](https://github.com/thingsboard/sparkplug-emulator/blob/main/src/main/resources/Metrics.json)
+
+This file contains a simple JSON structure describing the device ID and a list of metrics.  
+The special `node` flag in the first JSON object defines metrics for the EoN Node itself.  
+You can supply your own metrics file using the environment variable `SPARKPLUG_CLIENT_METRICS_FILE_PATH`.
+
+---
+
+## Building from Sources
+
+```bash
 mvn clean install
 ```
 
-### Running as plain java application
+or
 
-```shell
-java -jar sparkplug-1.17-jar-with-dependencies.jar
+```bash
+mvn clean package -DskipTests
 ```
 
+---
 
+## Running as a Plain Java Application
+
+### Configuring Sparkplug Emulator with Environment Variables
+
+Set environment variables:
+
+```bash
+export SPARKPLUG_SERVER_URL=tcp://demo.thingsboard.io:1883
+export SPARKPLUG_CLIENT_MQTT_USERNAME=YOUR_THINGSBOARD_DEVICE_TOKEN
+```
+
+### Running the application
+- 
+- version can vary
+
+```bash
+java -jar sparkplug-{version}-jar-with-dependencies.jar
+```
+
+or
+
+```bash
+java -jar sparkplug-3.0.1-jar-with-dependencies.jar
+```
+
+---
+
+### Example running with a local MQTT broker:
+
+```bash
+SPARKPLUG_SERVER_URL=tcp://localhost:1883 \
+SPARKPLUG_CLIENT_MQTT_USERNAME=n03suscyeul0o1dn6b09 \
+java -jar sparkplug-3.0.1-jar-with-dependencies.jar
+```
+
+or
+
+```bash
+export SPARKPLUG_SERVER_URL=tcp://localhost:1883
+export SPARKPLUG_CLIENT_MQTT_USERNAME=n03suscyeul0o1dn6b09
+java -jar sparkplug-3.0.1-jar-with-dependencies.jar
+```
+
+---
+
+### Running again with Docker
+
+```bash
+docker run -e SPARKPLUG_SERVER_URL='tcp://demo.thingsboard.io:1883' \
+  -e SPARKPLUG_CLIENT_MQTT_USERNAME='YOUR_THINGSBOARD_DEVICE_TOKEN' \
+  thingsboard/tb-sparkplug-emulator:latest
+```
+
+---
+
+For more detailed information, see the [Thingsboard Sparkplug API documentation](https://thingsboard.io/docs/reference/mqtt-sparkplug-api/).
+
+---
+
+If you need, I can help add clarifications or improvements.

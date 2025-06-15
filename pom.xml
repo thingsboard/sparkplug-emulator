@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright © ${project.inceptionYear}-2024 The Thingsboard Authors
+    Copyright © 2016-2025 The Thingsboard Authors
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,46 +15,59 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.4</version>
+        <relativePath/>
+    </parent>
+
     <groupId>org.thinghsboard</groupId>
     <artifactId>sparkplug</artifactId>
-    <version>1.3.0</version>
+    <version>3.0.1</version>
     <packaging>jar</packaging>
 
+    <name>Thingsboard Sparkplug Emulator</name>
+    <url>https://thingsboard.io/docs/reference/mqtt-sparkplug-api/</url>
+    <inceptionYear>2016</inceptionYear>
+
     <properties>
-        <main.dir>${basedir}</main.dir>
-        <docker.dir>${main.dir}/target</docker.dir>
-        <pkg.user>thingsboard</pkg.user>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <os-maven-plugin.version>1.7.0</os-maven-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <protobuf.version>3.25.3</protobuf.version>
         <xolstice_protobuf.version>0.6.1</xolstice_protobuf.version>
         <grpc.version>1.63.0</grpc.version>
-        <jar.version>3.4.0</jar.version>
-        <spring-core.version>6.1.6</spring-core.version>
-        <spring-boot.version>3.2.4</spring-boot.version>
         <paho.mqttv5.client.version>1.2.5</paho.mqttv5.client.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson-databind.version>2.17.2</jackson-databind.version>
         <lombok.version>1.18.32</lombok.version>
         <slf4j.version>2.0.13</slf4j.version>
-        <log4j.version>2.23.1</log4j.version>
         <logback.version>1.5.5</logback.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <pkg.name>tb-sparkplug</pkg.name>
-        <docker.name>tb-sparkplug-emulator</docker.name>
-        <docker.repo>thingsboard</docker.repo>
-        <dockerfile.skip>true</dockerfile.skip>
-        <pkg.logFolder>/var/log/${pkg.name}</pkg.logFolder>
-        <pkg.installFolder>/usr/share/${pkg.name}</pkg.installFolder>
+        <main.dir>${basedir}</main.dir>
+        <app.build.time>@build.timestamp@</app.build.time>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
@@ -67,34 +79,20 @@
             <version>${paho.mqttv5.client.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring-core.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-databind.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-            <version>${spring-boot.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-to-slf4j</artifactId>
-            <version>${log4j.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -109,37 +107,100 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>${os-maven-plugin.version}</version>
-            </extension>
-        </extensions>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>3.0</version>
                     <configuration>
-                        <release>17</release>
-                        <compilerArgs>
-                            <arg>-Xlint:deprecation</arg>
-                            <arg>-Xlint:removal</arg>
-                            <arg>-Xlint:unchecked</arg>
-                        </compilerArgs>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
+                        <header>${main.dir}/license-header-template.txt</header>
+                        <properties>
+                            <owner>The Thingsboard Authors</owner>
+                        </properties>
+                        <excludes>
+                            <exclude>**/.env</exclude>
+                            <exclude>**/*.env</exclude>
+                            <exclude>**/.eslintrc</exclude>
+                            <exclude>**/.babelrc</exclude>
+                            <exclude>**/.jshintrc</exclude>
+                            <exclude>**/.gradle/**</exclude>
+                            <exclude>**/nightwatch</exclude>
+                            <exclude>**/README</exclude>
+                            <exclude>**/LICENSE</exclude>
+                            <exclude>**/banner.txt</exclude>
+                            <exclude>node_modules/**</exclude>
+                            <exclude>**/*.properties</exclude>
+                            <exclude>src/test/resources/**</exclude>
+                            <exclude>src/vendor/**</exclude>
+                            <exclude>src/font/**</exclude>
+                            <exclude>src/sh/**</exclude>
+                            <exclude>packaging/*/scripts/control/**</exclude>
+                            <exclude>packaging/*/scripts/windows/**</exclude>
+                            <exclude>packaging/*/scripts/init/**</exclude>
+                            <exclude>**/*.log</exclude>
+                            <exclude>**/*.current</exclude>
+                            <exclude>.instance_id</exclude>
+                            <exclude>src/main/scripts/control/**</exclude>
+                            <exclude>src/main/scripts/windows/**</exclude>
+                            <exclude>src/main/resources/public/static/rulenode/**</exclude>
+                            <exclude>**/*.proto.js</exclude>
+                            <exclude>docker/haproxy/**</exclude>
+                            <exclude>docker/tb-node/**</exclude>
+                            <exclude>ui/**</exclude>
+                            <exclude>**/.browserslistrc</exclude>
+                            <exclude>**/yarn.lock</exclude>
+                            <exclude>**/.yarnrc</exclude>
+                            <exclude>**/.angular/**</exclude>
+                            <exclude>**/*.raw</exclude>
+                            <exclude>**/*.patch</exclude>
+                            <exclude>**/apache/cassandra/io/**</exclude>
+                            <exclude>.run/**</exclude>
+                            <exclude>**/NetworkReceive.java</exclude>
+                            <exclude>**/lwm2m-registry/**</exclude>
+                            <exclude>**/test/resources/lwm2m/**</exclude>
+                            <exclude>**/resources/lwm2m/models/**</exclude>
+                            <exclude>src/main/data/resources/**</exclude>
+                        </excludes>
+                        <mapping>
+                            <proto>JAVADOC_STYLE</proto>
+                            <cql>DOUBLEDASHES_STYLE</cql>
+                            <scss>JAVADOC_STYLE</scss>
+                            <jsx>SLASHSTAR_STYLE</jsx>
+                            <tsx>SLASHSTAR_STYLE</tsx>
+                            <conf>SCRIPT_STYLE</conf>
+                            <gradle>JAVADOC_STYLE</gradle>
+                        </mapping>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/application.yml</include>
+                    <include>**/banner.txt</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/application.yml</exclude>
+                    <exclude>**/banner.txt</exclude>
+                </excludes>
+            </resource>
+        </resources>
 
         <plugins>
             <plugin>
@@ -147,16 +208,9 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>${xolstice_protobuf.version}</version>
                 <configuration>
-                    <!--
-                      The version of protoc must match protobuf-java. If you don't depend on
-                      protobuf-java directly, you will be transitively depending on the
-                      protobuf-java version that grpc depends on.
-                    -->
-                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-                    </pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
@@ -168,102 +222,56 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>timestamp-property</id>
+                        <phase>validate</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>timestamp-property</goal>
                         </goals>
                         <configuration>
-                            <archive>
-                                <manifest>
-                                    <mainClass>
-                                        org.thinghsboard.sparkplug.SparkplugEmulation
-                                    </mainClass>
-                                </manifest>
-                            </archive>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
+                            <name>build.timestamp</name>
+                            <pattern>${maven.build.timestamp.format}</pattern>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>${main.dir}/license-header-template.txt</header>
-                    <properties>
-                        <owner>The Thingsboard Authors</owner>
-                    </properties>
-                    <excludes>
-                        <exclude>**/.env</exclude>
-                        <exclude>**/*.env</exclude>
-                        <exclude>**/.eslintrc</exclude>
-                        <exclude>**/.babelrc</exclude>
-                        <exclude>**/.jshintrc</exclude>
-                        <exclude>**/.gradle/**</exclude>
-                        <exclude>**/nightwatch</exclude>
-                        <exclude>**/README</exclude>
-                        <exclude>**/LICENSE</exclude>
-                        <exclude>**/banner.txt</exclude>
-                        <exclude>node_modules/**</exclude>
-                        <exclude>**/*.properties</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/vendor/**</exclude>
-                        <exclude>src/font/**</exclude>
-                        <exclude>src/sh/**</exclude>
-                        <exclude>packaging/*/scripts/control/**</exclude>
-                        <exclude>packaging/*/scripts/windows/**</exclude>
-                        <exclude>packaging/*/scripts/init/**</exclude>
-                        <exclude>**/*.log</exclude>
-                        <exclude>**/*.current</exclude>
-                        <exclude>.instance_id</exclude>
-                        <exclude>src/main/scripts/control/**</exclude>
-                        <exclude>src/main/scripts/windows/**</exclude>
-                        <exclude>src/main/resources/public/static/rulenode/**</exclude>
-                        <exclude>**/*.proto.js</exclude>
-                        <exclude>ui/**</exclude>
-                        <exclude>**/.browserslistrc</exclude>
-                        <exclude>**/yarn.lock</exclude>
-                        <exclude>**/.yarnrc</exclude>
-                        <exclude>**/.angular/**</exclude>
-                        <exclude>**/*.raw</exclude>
-                        <exclude>**/*.patch</exclude>
-                        <exclude>**/apache/cassandra/io/**</exclude>
-                        <exclude>.run/**</exclude>
-                        <exclude>**/NetworkReceive.java</exclude>
-                    </excludes>
-                    <mapping>
-                        <proto>JAVADOC_STYLE</proto>
-                        <cql>DOUBLEDASHES_STYLE</cql>
-                        <scss>JAVADOC_STYLE</scss>
-                        <jsx>SLASHSTAR_STYLE</jsx>
-                        <tsx>SLASHSTAR_STYLE</tsx>
-                        <conf>SCRIPT_STYLE</conf>
-                        <gradle>JAVADOC_STYLE</gradle>
-                    </mapping>
-                </configuration>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.0</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>check</goal>
+                            <goal>detect</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-docker-config</id>
-                        <phase>process-resources</phase>
+                        <id>copy-dockerfile</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -271,7 +279,10 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>docker</directory>
+                                    <directory>${project.basedir}/docker</directory>
+                                    <includes>
+                                        <include>Dockerfile</include>
+                                    </includes>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
@@ -280,83 +291,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>build-docker-image</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${docker.name}</repository>
-                            <verbose>true</verbose>
-                            <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
-                            <contextDirectory>${project.build.directory}</contextDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>tag-docker-image</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>tag</goal>
-                        </goals>
-                        <configuration>
-                            <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${docker.name}</repository>
-                            <tag>${project.version}</tag>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-<!--    Docker-->
-    <profiles>
-        <profile>
-            <id>push-docker-image</id>
-            <activation>
-                <property>
-                    <name>push-docker-image</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>dockerfile-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>push-latest-docker-image</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>push</goal>
-                                </goals>
-                                <configuration>
-                                    <tag>latest</tag>
-                                    <repository>${docker.repo}/${docker.name}</repository>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>push-version-docker-image</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>push</goal>
-                                </goals>
-                                <configuration>
-                                    <tag>${project.version}</tag>
-                                    <repository>${docker.repo}/${docker.name}</repository>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>
-
-

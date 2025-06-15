@@ -14,9 +14,7 @@
 # limitations under the License.
 #
 
-FROM thingsboard/openjdk17:bookworm-slim
-
-COPY ./sparkplug*.jar /app.jar
-
-CMD ["java", "-jar", "/app.jar"]
-
+app:
+  version: '@project.version@'
+  title: '@project.name@'
+  build.time: '@maven.build.timestamp@'

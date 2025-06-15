@@ -13,18 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thinghsboard.sparkplug.config;
+package org.thinghsboard.sparkplug;
 
-import lombok.Data;
-import java.util.List;
+import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.springframework.stereotype.Service;
 
-/**
- * Created by nickAS21 on 10.01.23
- */
-@Data
-public class NodeDevice {
-    String nodeDeviceId;
-    List<NodeDeviceMetric> nodeDeviceListMetrics;
-    boolean node;
+@Slf4j
+@Service
+public class SparkplugService {
+
+    private final SparkplugCore core;
+
+    public SparkplugService() throws MqttException {
+        this.core = new SparkplugCore(); // можна замінити DI при бажанні
+    }
+
+    public void run() {
+        core.run();
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        core.clientClose();
+    }
 }
-

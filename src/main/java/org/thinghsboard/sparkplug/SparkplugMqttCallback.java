@@ -1,5 +1,5 @@
 /**
- * Copyright © ${project.inceptionYear}-2024 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ import static org.thinghsboard.sparkplug.util.SparkplugTopicUtil.parseTopicPubli
 @Slf4j
 public class SparkplugMqttCallback implements MqttCallback {
 
-    private SparkplugEmulation sparkPlugEmulation;
+    private SparkplugCore sparkPlugEmulation;
 
-    public SparkplugMqttCallback(SparkplugEmulation sparkPlugEmulation) {
+    public SparkplugMqttCallback(SparkplugCore sparkPlugEmulation) {
         this.sparkPlugEmulation = sparkPlugEmulation;
     }
 
