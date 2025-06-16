@@ -28,16 +28,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @Slf4j
 @SpringBootApplication
-public class SparkplugEmulation implements CommandLineRunner {
+public class SparkplugEmulator implements CommandLineRunner {
 
     private final SparkplugService sparkplugService;
 
-    public SparkplugEmulation(SparkplugService sparkplugService) {
+    public SparkplugEmulator(SparkplugService sparkplugService) {
         this.sparkplugService = sparkplugService;
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(SparkplugEmulation.class, args);
+        SpringApplication.run(SparkplugEmulator.class, args);
     }
 
     @Override
